@@ -1,4 +1,5 @@
 using CoreServices;
+using CoreServices.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.Versioning;
@@ -37,13 +38,15 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.ConfigureOptions<ConfigureSwaggerOptions>();
 
-var app = builder.Build();
+builder.Services.AddHttpClient<QrzDataService>()
+    .SetHandlerLifetime(TimeSpan.FromMinutes(10));
 
-var apiVersionDescriptionProvider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
+var app = builder.Build();
 
 app.UseSwagger();
 app.UseSwaggerUI(options =>
 {
+    var apiVersionDescriptionProvider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
     foreach (var description in apiVersionDescriptionProvider.ApiVersionDescriptions.Reverse())
         options.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json",
             description.GroupName.ToUpperInvariant());

@@ -4,16 +4,16 @@ EXPOSE 80
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
-COPY ["MaidenheadService/MaidenheadService.csproj", "MaidenheadService/"]
-RUN dotnet restore "MaidenheadService/MaidenheadService.csproj"
+COPY ["CoreServices/CoreServices.csproj", "CoreServices/"]
+RUN dotnet restore "CoreServices/CoreServices.csproj"
 COPY . .
-WORKDIR "/src/MaidenheadService"
-RUN dotnet build "MaidenheadService.csproj" -c Release -o /app/build
+WORKDIR "/src/CoreServices"
+RUN dotnet build "CoreServices.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "MaidenheadService.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "CoreServices.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "MaidenheadService.dll"]
+ENTRYPOINT ["dotnet", "CoreServices.dll"]
