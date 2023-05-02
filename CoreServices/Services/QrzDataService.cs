@@ -64,7 +64,7 @@ public class QrzDataService
         }
     }
 
-    public async Task<QRZDatabase> GetCallDataAsync(string call)
+    private async Task<(bool, QRZDatabase?)> ValidateSessionAsync()
     {
         if (string.IsNullOrEmpty(_sessionToken))
         {
@@ -72,10 +72,21 @@ public class QrzDataService
             if (status.Item1 == false)
             {
                 _logger.LogError("Failed to create QRZ session");
-                return status.Item2;
+                return status;
             }
         }
 
+        return (true, null);
+    }
+
+    public async Task<QRZDatabase> GetCallDataAsync(string call)
+    {
+        var sessionStatus = await ValidateSessionAsync();
+        if (sessionStatus.Item1 == false)
+        {
+            return sessionStatus.Item2 ?? CreateError("Error validating session", String.Empty);
+        }
+        
         var tryCount = 0;
 
         while (true)
