@@ -39,7 +39,7 @@ public class QrzDataService
             var response = await _httpClient.PostAsync("/xml/current", content);
 
             var xml = await response.Content.ReadAsStringAsync();
-            await Console.Out.WriteLineAsync(xml);
+            _logger.LogDebug(xml);
         
             XmlSerializer serializer = new XmlSerializer(typeof(QRZDatabase));
 
@@ -92,6 +92,7 @@ public class QrzDataService
                 var response = await _httpClient.GetAsync(QueryHelpers.AddQueryString("/xml/current", keys));
                
                 var xml = await response.Content.ReadAsStringAsync();
+                _logger.LogDebug(xml);
                 
                 XmlSerializer serializer = new XmlSerializer(typeof(QRZDatabase));
 
