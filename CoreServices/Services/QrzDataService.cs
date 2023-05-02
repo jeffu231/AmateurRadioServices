@@ -11,6 +11,7 @@ public class QrzDataService
     private readonly string _password;
     private static string _sessionToken = String.Empty;
     private readonly HttpClient _httpClient;
+    private static readonly XmlSerializer QrzDatabaseSerializer = new(typeof(QRZDatabase));
     private readonly ILogger<QrzDataService> _logger;
 
     public QrzDataService(HttpClient httpClient, ILogger<QrzDataService> logger)
@@ -23,7 +24,7 @@ public class QrzDataService
         _httpClient.DefaultRequestHeaders.Add(HeaderNames.UserAgent, "Mozilla/5.0");
     }
 
-    private async Task<Tuple<bool,QRZDatabase>> CreateSessionAsync()
+    private async Task<(bool,QRZDatabase)> CreateSessionAsync()
     {
         _logger.LogDebug("Creating session token");
         var query = new Dictionary<string, string>
@@ -40,34 +41,32 @@ public class QrzDataService
 
             var xml = await response.Content.ReadAsStringAsync();
             _logger.LogDebug(xml);
-        
-            XmlSerializer serializer = new XmlSerializer(typeof(QRZDatabase));
-
+            
             using StringReader reader = new StringReader(xml);
-            if (serializer.Deserialize(reader) is QRZDatabase qrzDatabase)
+            if (QrzDatabaseSerializer.Deserialize(reader) is QRZDatabase qrzDatabase)
             {
                 if(qrzDatabase.Session != null && qrzDatabase.Session[0].Key != null)
                 {
                     _sessionToken = qrzDatabase.Session[0].Key;
-                    return Tuple.Create(true, qrzDatabase);
+                    return (true, qrzDatabase);
                 }
                 _sessionToken = string.Empty;
-                return Tuple.Create(false, qrzDatabase);
+                return (false, qrzDatabase);
             }
             
             _logger.LogError(@"Failed create session for QRZ");
-            return Tuple.Create(false, CreateError("Error deserializing session", string.Empty));
+            return (false, CreateError("Error deserializing session", string.Empty));
         }
         catch (Exception ex)
         {
             _logger.LogError(@"Failed create session for QRZ");
-            return Tuple.Create(false, CreateError("Error creating session", ex.Message));
+            return (false, CreateError("Error creating session", ex.Message));
         }
     }
 
     public async Task<QRZDatabase> GetCallDataAsync(string call)
     {
-        if (_sessionToken == String.Empty)
+        if (string.IsNullOrEmpty(_sessionToken))
         {
             var status = await CreateSessionAsync();
             if (status.Item1 == false)
@@ -94,10 +93,8 @@ public class QrzDataService
                 var xml = await response.Content.ReadAsStringAsync();
                 _logger.LogDebug(xml);
                 
-                XmlSerializer serializer = new XmlSerializer(typeof(QRZDatabase));
-
                 using StringReader reader = new StringReader(xml);
-                if (serializer.Deserialize(reader) is QRZDatabase qrzDatabase)
+                if (QrzDatabaseSerializer.Deserialize(reader) is QRZDatabase qrzDatabase)
                 {
                     if (qrzDatabase.Session != null)
                     {
