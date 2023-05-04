@@ -9,16 +9,20 @@ public class QrzDataService
 {
     private readonly string _username;
     private readonly string _password;
+    private readonly string _agent;
     private static string _sessionToken = String.Empty;
     private readonly HttpClient _httpClient;
     private static readonly XmlSerializer QrzDatabaseSerializer = new(typeof(QRZDatabase));
     private readonly ILogger<QrzDataService> _logger;
+    private readonly IConfiguration _config;
 
-    public QrzDataService(HttpClient httpClient, ILogger<QrzDataService> logger)
+    public QrzDataService(HttpClient httpClient, ILogger<QrzDataService> logger, IConfiguration config)
     {
         _logger = logger;
-        _username = Environment.GetEnvironmentVariable("username") ?? String.Empty;
-        _password = Environment.GetEnvironmentVariable("password") ?? String.Empty;
+        _config = config;
+        _username = _config["QrzUsername"] ?? String.Empty;
+        _password = _config["QrzPassword"] ?? String.Empty;
+        _agent = _config["AgentIdentifier"] ?? "ARUv1.0";
         _httpClient = httpClient;
         _httpClient.BaseAddress = new Uri("https://xmldata.qrz.com");
         _httpClient.DefaultRequestHeaders.Add(HeaderNames.UserAgent, "Mozilla/5.0");
@@ -31,9 +35,9 @@ public class QrzDataService
         {
             ["username"] = _username,
             ["password"] = _password,
-            ["agent"] = "ARUv1.0"
+            ["agent"] = _agent
         };
-
+        _logger.LogInformation("Agent = {}", _config["AgentIdentifier"] ?? String.Empty);
         try
         {
             HttpContent content = new FormUrlEncodedContent(query);

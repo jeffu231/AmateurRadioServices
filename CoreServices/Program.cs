@@ -1,3 +1,4 @@
+using System.Net.Http.Headers;
 using CoreServices;
 using CoreServices.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -10,9 +11,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers(o =>
 {
-    o.RespectBrowserAcceptHeader = true;
-    o.ReturnHttpNotAcceptable = true;
+    // o.RespectBrowserAcceptHeader = true;
+    // o.ReturnHttpNotAcceptable = true;
 }).AddNewtonsoftJson().AddXmlSerializerFormatters();
+
+
 
 builder.Services.AddApiVersioning(options =>
 {
@@ -20,8 +23,9 @@ builder.Services.AddApiVersioning(options =>
     options.DefaultApiVersion = new ApiVersion(1, 0);
     options.AssumeDefaultVersionWhenUnspecified = true;
     options.ApiVersionReader = ApiVersionReader.Combine(new UrlSegmentApiVersionReader(),
-        new HeaderApiVersionReader("x-api-version"),
-        new MediaTypeApiVersionReader("x-api-version"));
+        new HeaderApiVersionReader("x-api-version")
+        //new MediaTypeApiVersionReader("x-api-version")
+        );
 });
 
 // Add ApiExplorer to discover versions
