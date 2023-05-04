@@ -20,6 +20,7 @@ riderModule.iml
 .idea/**/usage.statistics.xml
 .idea/**/dictionaries
 .idea/**/shelf
+.idea/.idea*
 
 # AWS User-specific
 .idea/**/aws.xml
