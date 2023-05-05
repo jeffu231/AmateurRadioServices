@@ -50,13 +50,10 @@ var swaggerBasePath = "api/ars";
 
 app.UseSwagger(options =>
 {
-    Console.Out.WriteLine(options.RouteTemplate);
     options.RouteTemplate = swaggerBasePath + "/swagger/{documentName}/swagger.{json|yaml}";
-    Console.Out.WriteLine(options.RouteTemplate);
 });
 app.UseSwaggerUI(options =>
 {
-    Console.Out.WriteLine($"Prefix {options.RoutePrefix}");
     options.RoutePrefix = $"{swaggerBasePath}/swagger";
     var apiVersionDescriptionProvider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
     foreach (var description in apiVersionDescriptionProvider.ApiVersionDescriptions.Reverse())
