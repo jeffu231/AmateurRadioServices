@@ -29,7 +29,7 @@ public class MaidenheadController : ControllerBase
             var start = MaidenheadLocator.LocatorToLatLng(srcGrid);
             var end = MaidenheadLocator.LocatorToLatLng(destGrid);
 
-            return Ok(Math.Round(MaidenheadLocator.Azimuth(start, end), 0, MidpointRounding.AwayFromZero));
+            return Ok((Int32)Math.Round(MaidenheadLocator.Azimuth(start, end), 0, MidpointRounding.AwayFromZero));
         }
         
         return BadRequest("Missing source or destination grid");
