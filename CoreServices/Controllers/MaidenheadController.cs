@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace CoreServices.Controllers;
 
 [ApiController]
-[Route("api/v{version:apiVersion}/maidenhead")]
+[Route("api/ars/v{version:apiVersion}/[controller]")]
 [ApiVersion("1.0")]
 public class MaidenheadController : ControllerBase
 {
