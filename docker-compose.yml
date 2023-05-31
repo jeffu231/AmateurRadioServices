@@ -1,0 +1,28 @@
+################################################################################
+# Amateur Radio Services
+################################################################################
+# docker-compose -f docker-compose.yml -p amateur-radio-services up
+# Requires environment for the QRZ credentials
+################################################################################
+version: "3.7"
+
+services:
+  amateur-radio-services:
+    image: amateur-radio-api
+    restart: unless-stopped
+    networks:
+      - traefik-net
+    build: 
+      context: https://github.com/jeffu231/AmateurRadioServices.git
+      dockerfile: CoreServices/Dockerfile
+    environment:
+      - QrzUsername=${QrzUsername}
+      - QrzPassword=${QrzPassword}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.amateur-radio-utilities-api.rule=Host(`docker01.home.kb9kld.org`) && (PathPrefix(`/api/ars/`))"
+
+networks:
+  traefik-net:
+    external: true
+   
