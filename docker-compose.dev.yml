@@ -1,5 +1,5 @@
 services:
   amateur-radio-services:
     build: 
-      context: $HOME/Dev/AmateurRadioServices
+      context: .
       
