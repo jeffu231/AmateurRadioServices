@@ -26,12 +26,12 @@ public class ContactController: ControllerBase
     /// </summary>
     /// <param name="contactInfo"></param>
     /// <returns></returns>
-    [HttpPost("EnhanceContactInfo")]
+    [HttpPost("EnhanceBearing")]
     [MapToApiVersion("1.0")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(ContactInfo), (int)HttpStatusCode.OK)]
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-    public async Task<IActionResult> EnhanceContactInfo([FromBody] ContactInfo contactInfo)
+    public async Task<IActionResult> EnhanceBearing([FromBody] ContactInfo contactInfo)
     {
         if (string.IsNullOrEmpty(contactInfo.DxCall))
         {
