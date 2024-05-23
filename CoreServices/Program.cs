@@ -44,6 +44,9 @@ builder.Services.ConfigureOptions<ConfigureSwaggerOptions>();
 builder.Services.AddHttpClient<QrzDataService>()
     .SetHandlerLifetime(TimeSpan.FromMinutes(10));
 
+builder.Services.AddHttpClient<AprsService>()
+    .SetHandlerLifetime(TimeSpan.FromMinutes(10));
+
 var app = builder.Build();
 
 var swaggerBasePath = "api/ars";

@@ -18,6 +18,7 @@ services:
     environment:
       - QrzUsername=${QrzUsername}
       - QrzPassword=${QrzPassword}
+      - AprsApiKey=${AprsApiKey}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.amateur-radio-utilities-api.rule=Host(`docker01.home.kb9kld.org`) && (PathPrefix(`/api/ars/`))"
