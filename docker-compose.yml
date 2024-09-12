@@ -2,10 +2,8 @@
 # Amateur Radio Services
 ################################################################################
 # docker-compose -f docker-compose.yml -p amateur-radio-services up
-# Requires environment for the QRZ credentials
+# Requires environment for the QRZ credentials and aprs.fi api
 ################################################################################
-version: "3.7"
-
 services:
   amateur-radio-services:
     image: amateur-radio-api
