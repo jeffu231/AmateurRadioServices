@@ -7,6 +7,7 @@
 services:
   amateur-radio-services:
     image: amateur-radio-api
+    container_name: amateur-radio-api
     restart: unless-stopped
     networks:
       - traefik-net
