@@ -20,10 +20,11 @@ This API provides the distance between two grids, the bearing between two grids,
 
 ## Docker Compose
 
-The compose file requires a local .env file to provide the credential for QRZ, and aprs.fi api.
+The compose file utilizes traefik for managing routes. Remove those sections if not needed. It also requires a local .env file to provide the credential for QRZ, aprs.fi, and the hostname that the container is hosted in for the traefik route.
 
 Ex.
 
 QrzUsername=Bob
 QrzPassword=1234
 AprsApiKey=xyz
+HOSTNAME=myhost.com

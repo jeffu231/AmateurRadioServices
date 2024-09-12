@@ -21,7 +21,7 @@ services:
       - AprsApiKey=${AprsApiKey}
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.amateur-radio-utilities-api.rule=Host(`docker01.home.kb9kld.org`) && (PathPrefix(`/api/ars/`))"
+      - "traefik.http.routers.amateur-radio-utilities-api.rule=Host(`$HOSTNAME`) && (PathPrefix(`/api/ars/`))"
 
 networks:
   traefik-net:
