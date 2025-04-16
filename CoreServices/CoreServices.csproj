@@ -1,10 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+        <Company>Jeff Uchitjil</Company>
+        <Version>1.0.1</Version>
+        <RepositoryUrl>https://github.com/jeffu231/AmateurRadioServices</RepositoryUrl>
     </PropertyGroup>
 
     <ItemGroup>

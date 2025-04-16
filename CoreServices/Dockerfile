@@ -17,3 +17,7 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "CoreServices.dll"]
+
+LABEL org.opencontainers.image.source=https://github.com/jeffu231/AmateurRadioServices
+LABEL org.opencontainers.image.description="Amateur Radio Services - Core services for Amateur Radio"
+LABEL org.opencontainers.image.licenses=MIT
