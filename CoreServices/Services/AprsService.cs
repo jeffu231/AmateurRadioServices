@@ -20,6 +20,11 @@ public class AprsService
         _aprsApiKey = config["AprsApiKey"] ?? String.Empty;
     }
     
+    /// <summary>
+    /// Makes a lookup to aprs.fi to find location info for the given call
+    /// </summary>
+    /// <param name="id">Call identifier used in APRS packets</param>
+    /// <returns>A location record. <see cref="AprsLocRecord"/></returns>
     public async Task<AprsLocRecord?> GetAprsLocRecordAsync(string id)
     {
         var query = new Dictionary<string, string>
