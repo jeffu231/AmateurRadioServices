@@ -6,7 +6,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
         <Company>Jeff Uchitjil</Company>
-        <Version>1.0.1</Version>
+        <Version>1.0.2</Version>
         <RepositoryUrl>https://github.com/jeffu231/AmateurRadioServices</RepositoryUrl>
     </PropertyGroup>
 
