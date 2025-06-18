@@ -7,7 +7,7 @@ on:
     branches:
       - master
     paths:
-      - 'AmateurRadioServices/**'
+      - 'CoreServices/**'
 
 env:
   REGISTRY: ghcr.io
