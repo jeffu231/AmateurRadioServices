@@ -83,6 +83,11 @@ public class QrzDataService
         return (true, null);
     }
 
+    /// <summary>
+    /// Gets the Call data information from QRZ for the given call
+    /// </summary>
+    /// <param name="call">Valid callsign to lookup</param>
+    /// <returns><see cref="QRZDatabase"/> record</returns>
     public async Task<QRZDatabase> GetCallDataAsync(string call)
     {
         var sessionStatus = await ValidateSessionAsync();
