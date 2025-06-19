@@ -1,7 +1,7 @@
 {
   "changelog": {
     "header": "BuildTestConsole Changelog",
-    "includeAllCommits": true,
+    "includeAllCommits": false,
     "skipDirty": true,
     "aggregatePreReleases": true,
     "sections": [
@@ -21,15 +21,25 @@
         "hidden": false
       },
       {
-        "type": "docs",
-        "section": "Documentation",
-        "hidden": false
-      },
-      {
          "type": "ci",
          "section": "Continuous Integration",
          "hidden": false
-       }
+      },
+      {
+          "type": "docs",
+          "section": "Documentation",
+          "hidden": false
+       },
+       {
+           "type": "log",
+           "section": "Logging",
+           "hidden": false
+        },
+        {
+            "type": "wip",
+            "section": "Work in Progress",
+            "hidden": false
+         }
     ]
   }
 }
