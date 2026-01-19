@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/versionize/versionize) for commit guidelines.
 
+<a name="1.0.4"></a>
+## [1.0.4](https://www.github.com/jeffu231/AmateurRadioServices/releases/tag/v1.0.4) (2026-01-19)
+
+### Bug Fixes
+
+* update logging format to json ([8eb6a9d](https://www.github.com/jeffu231/AmateurRadioServices/commit/8eb6a9d850864edbf25f69878711c300e0f94ad5))
+
+### Continuous Integration
+
+* Add log and build keywords to commit linter ([ae1ace0](https://www.github.com/jeffu231/AmateurRadioServices/commit/ae1ace0469e86529f887c901c1636306203fdcae))
+* update versionize config to not include all commits ([d1dd441](https://www.github.com/jeffu231/AmateurRadioServices/commit/d1dd44110f1573a7008702f841cdb7129356adeb))
+
 <a name="1.0.3"></a>
 ## [1.0.3](https://www.github.com/jeffu231/AmateurRadioServices/releases/tag/v1.0.3) (2025-06-18)
 
