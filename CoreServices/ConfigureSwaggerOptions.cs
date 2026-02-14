@@ -21,7 +21,7 @@ public class ConfigureSwaggerOptions : IConfigureNamedOptions<SwaggerGenOptions>
     /// <param name="options"></param>
     public void Configure(SwaggerGenOptions options)
     {
-        // add swagger document for every API version discovered
+        // add a swagger document for every API version discovered
         foreach (var description in _provider.ApiVersionDescriptions)
             options.SwaggerDoc(
                 description.GroupName,

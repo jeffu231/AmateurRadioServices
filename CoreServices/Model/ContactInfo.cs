@@ -2,13 +2,13 @@ namespace CoreServices.Model;
 
 public class ContactInfo
 {
-    public string DeCall { get; set; }
+    public string DeCall { get; set; } = String.Empty;
 
-    public string DeGrid { get; set; }
+    public string DeGrid { get; set; } = String.Empty;
 
-    public string DxCall { get; set; }
+    public string DxCall { get; set; } = String.Empty;
 
-    public string DxGrid { get; set; }
+    public string DxGrid { get; set; } = String.Empty;
 
     public double Bearing { get; set; }
 }
