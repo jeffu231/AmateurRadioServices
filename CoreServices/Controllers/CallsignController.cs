@@ -1,4 +1,5 @@
 using System.Net;
+using Asp.Versioning;
 using CoreServices.Model.Qrz;
 using CoreServices.Services;
 using Microsoft.AspNetCore.Mvc;
