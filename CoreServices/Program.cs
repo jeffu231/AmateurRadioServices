@@ -1,4 +1,5 @@
 using System.Net.Http.Headers;
+using System.Text.Json;
 using CoreServices;
 using CoreServices.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -14,7 +15,14 @@ builder.Services.AddControllers(o =>
 {
     o.RespectBrowserAcceptHeader = true;
     o.ReturnHttpNotAcceptable = true;
-}).AddNewtonsoftJson().AddXmlSerializerFormatters();
+})
+.AddJsonOptions(opts =>
+{
+    // If you want camelCase JSON (similar to your previous Newtonsoft camel-case usage)
+    opts.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+    opts.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
+})
+    .AddXmlSerializerFormatters();
 
 
 

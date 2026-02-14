@@ -1,4 +1,4 @@
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace CoreServices.Model.Aprs;
 
@@ -14,6 +14,6 @@ public class AprsLocRecord
 
     public List<AprsEntry> Entries { get; set; } = new();
 
-    [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore)]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string Description { get; set; } = String.Empty;
 }

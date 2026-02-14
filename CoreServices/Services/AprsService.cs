@@ -1,11 +1,16 @@
+using System.Text.Json;
 using CoreServices.Model.Aprs;
 using Microsoft.Net.Http.Headers;
-using Newtonsoft.Json;
 
 namespace CoreServices.Services;
 
 public class AprsService
 {
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true
+    };
+    
     private readonly string _aprsApiKey;
     private readonly ILogger<AprsService> _logger;
     private readonly HttpClient _httpClient;
@@ -72,10 +77,6 @@ public class AprsService
     
     private static T? DeserializeFromStream<T>(Stream stream)
     {
-        var serializer = new JsonSerializer();
-
-        using var sr = new StreamReader(stream);
-        using var jsonTextReader = new JsonTextReader(sr);
-        return serializer.Deserialize<T>(jsonTextReader);
+        return JsonSerializer.Deserialize<T>(stream, JsonOptions);
     }
 }
