@@ -50,6 +50,10 @@ public class AprsService
                 var contentStream = await response.Content.ReadAsStreamAsync();
                 
                 AprsLocRecord? record = DeserializeFromStream<AprsLocRecord>(contentStream);
+                if (record != null)
+                {
+                    record.Description = "Success";
+                }
                 return record;
             }
             
