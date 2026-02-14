@@ -36,6 +36,8 @@ public static class Program
 
         builder.Services.AddHttpClient<AprsService>()
             .SetHandlerLifetime(TimeSpan.FromMinutes(10));
+        
+        builder.Services.AddProblemDetails();
 
         var app = builder.Build(); 
         
