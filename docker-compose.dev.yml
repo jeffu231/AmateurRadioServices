@@ -2,4 +2,5 @@ services:
   amateur-radio-services:
     build: 
       context: .
+      dockerfile: CoreServices/Dockerfile
       
