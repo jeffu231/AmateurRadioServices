@@ -23,6 +23,7 @@ public class MaidenheadController : ControllerBase
     [MapToApiVersion("1.0")]
     [ProducesResponseType(typeof(int), (int)HttpStatusCode.OK)]
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+    [Produces("application/json", "text/plain")]
     public IActionResult GetBearing([FromQuery] string srcGrid, [FromQuery] string destGrid)
     {
         if (!string.IsNullOrEmpty(srcGrid) && !string.IsNullOrEmpty(destGrid))
@@ -41,6 +42,7 @@ public class MaidenheadController : ControllerBase
     [MapToApiVersion("1.0")]
     [ProducesResponseType(typeof(Distance), (int)HttpStatusCode.OK)]
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+    [Produces("application/json")]
     public IActionResult GetDistance([FromQuery] string srcGrid, [FromQuery] string destGrid)
     {
         if (!string.IsNullOrEmpty(srcGrid) && !string.IsNullOrEmpty(destGrid))
@@ -58,6 +60,7 @@ public class MaidenheadController : ControllerBase
     [Route("grid")]
     [MapToApiVersion("1.0")]
     [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
+    [Produces("application/json", "text/plain")]
     public IActionResult GetGrid([FromQuery] double lat, [FromQuery] double lon)
     {
         var grid = MaidenheadLocator.LatLngToLocator(lat, lon);

@@ -22,6 +22,7 @@ public class CallsignController: ControllerBase
     [MapToApiVersion("1.0")]
     [ProducesResponseType(typeof(QRZDatabase), (int)HttpStatusCode.OK)]
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+    [Produces("application/json")]
     public async Task<IActionResult> GetCallDataByCallsign(string id)
     {
         if (!string.IsNullOrEmpty(id))
