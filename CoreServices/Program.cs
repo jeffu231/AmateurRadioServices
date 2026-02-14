@@ -1,10 +1,11 @@
 using System.Text.Json;
 using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
-using CoreServices;
 using CoreServices.Services;
 
-public partial class Program
+namespace CoreServices;
+
+public static class Program
 {
     public static void Main(string[] args)
     {
@@ -27,38 +28,22 @@ public partial class Program
             .AddXmlSerializerFormatters();
         
         ConfigureApiVersioning(builder);
-
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-        builder.Services.AddEndpointsApiExplorer();
-
-        builder.Services.AddSwaggerGen();
-
-        builder.Services.ConfigureOptions<ConfigureSwaggerOptions>();
-
+        
+        ConfigureSwagger(builder);
+        
         builder.Services.AddHttpClient<QrzDataService>()
             .SetHandlerLifetime(TimeSpan.FromMinutes(10));
 
         builder.Services.AddHttpClient<AprsService>()
             .SetHandlerLifetime(TimeSpan.FromMinutes(10));
 
-        var app = builder.Build();
-
-        var swaggerBasePath = "api/ars";
-
-        app.UseSwagger(options =>
-        {
-            options.RouteTemplate = swaggerBasePath + "/swagger/{documentName}/swagger.{json|yaml}";
-        });
-        app.UseSwaggerUI(options =>
-        {
-            options.RoutePrefix = $"{swaggerBasePath}/swagger";
-            var apiVersionDescriptionProvider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
-            foreach (var description in apiVersionDescriptionProvider.ApiVersionDescriptions.Reverse())
-                options.SwaggerEndpoint($"{description.GroupName}/swagger.json",
-                    description.GroupName.ToUpperInvariant());
-        });
-
+        var app = builder.Build(); 
+        
+        EnableSwagger(app);
+        
         app.UseAuthorization();
+        
+        app.UseExceptionHandler();
 
         app.MapControllers();
 
@@ -90,5 +75,32 @@ public partial class Program
                 options.SubstituteApiVersionInUrl = true; // Automatically replaces {version} in routes
             });
     }
-}
+    
+    private static void ConfigureSwagger(WebApplicationBuilder builder)
+    {
+        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+        builder.Services.AddEndpointsApiExplorer();
+            
+        builder.Services.AddSwaggerGen();
 
+        builder.Services.ConfigureOptions<ConfigureSwaggerOptions>();
+    }
+
+    private static void EnableSwagger(WebApplication app)
+    {
+        var swaggerBasePath = "api/ars";
+
+        app.UseSwagger(options =>
+        {
+            options.RouteTemplate = swaggerBasePath + "/swagger/{documentName}/swagger.{json|yaml}";
+        });
+        app.UseSwaggerUI(options =>
+        {
+            options.RoutePrefix = $"{swaggerBasePath}/swagger";
+            var apiVersionDescriptionProvider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
+            foreach (var description in apiVersionDescriptionProvider.ApiVersionDescriptions.Reverse())
+                options.SwaggerEndpoint($"{description.GroupName}/swagger.json",
+                    description.GroupName.ToUpperInvariant());
+        });
+    }
+}
