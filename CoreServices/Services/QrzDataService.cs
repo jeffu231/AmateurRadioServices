@@ -11,6 +11,7 @@ public class QrzDataService
     private readonly string _password;
     private readonly string _agent;
     private static string _sessionToken = String.Empty;
+    private static DateTime _subExpirationTime = DateTime.MinValue;
     private readonly HttpClient _httpClient;
     private static readonly XmlSerializer QrzDatabaseSerializer = new(typeof(QRZDatabase));
     private readonly ILogger<QrzDataService> _logger;
@@ -27,8 +28,12 @@ public class QrzDataService
         _httpClient.BaseAddress = new Uri("https://xmldata.qrz.com");
         _httpClient.DefaultRequestHeaders.Add(HeaderNames.UserAgent, "Mozilla/5.0");
     }
+    
+    public DateTime SubscriptionExpirationTime => _subExpirationTime;
+    
+    public bool IsSessionActive => _sessionToken != String.Empty;
 
-    private async Task<(bool,QRZDatabase)> CreateSessionAsync()
+    internal async Task<(bool success, QRZDatabase database)> CreateSessionAsync()
     {
         _logger.LogDebug("Creating session token");
         var query = new Dictionary<string, string>
@@ -52,6 +57,19 @@ public class QrzDataService
                 if(qrzDatabase.Session != null && qrzDatabase.Session[0].Key != null)
                 {
                     _sessionToken = qrzDatabase.Session[0].Key;
+
+                    if (DateTime.TryParseExact(qrzDatabase.Session[0].SubExp, "ddd MMM d HH:mm:ss yyyy",
+                            System.Globalization.CultureInfo.InvariantCulture,
+                            System.Globalization.DateTimeStyles.None, out var expDate))
+                    {
+                        _subExpirationTime = expDate;
+                        _logger.LogInformation("QRZ sub expires {SubExp}", _subExpirationTime);
+                    }
+                    else
+                    {
+                        _logger.LogError("Could not parse QRZ sub expired for {SubExp}", qrzDatabase.Session[0].SubExp);
+                    }
+                    
                     return (true, qrzDatabase);
                 }
                 _sessionToken = string.Empty;
