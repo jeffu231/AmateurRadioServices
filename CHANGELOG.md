@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/versionize/versionize) for commit guidelines.
 
+<a name="1.1.0"></a>
+## [1.1.0](https://www.github.com/jeffu231/AmateurRadioServices/releases/tag/v1.1.0) (2026-05-20)
+
+### Features
+
+* Add ability to get the sub expire date time from api call ([8d4919c](https://www.github.com/jeffu231/AmateurRadioServices/commit/8d4919cca72419d48c13fcb9240fb98e2d4b05f1))
+
+### Bug Fixes
+
+* Improve error handling parsing call info ([a801af0](https://www.github.com/jeffu231/AmateurRadioServices/commit/a801af043b630862ebad51689a23ddfa445fc352))
+
+### Continuous Integration
+
+* Update action versions and add global.json for dotnet version ([b193357](https://www.github.com/jeffu231/AmateurRadioServices/commit/b193357be7d79728670b483d81a2b4ba57597a89))
+
 <a name="1.0.5"></a>
 ## [1.0.5](https://www.github.com/jeffu231/AmateurRadioServices/releases/tag/v1.0.5) (2026-02-14)
 
