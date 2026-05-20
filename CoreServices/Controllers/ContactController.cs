@@ -14,10 +14,12 @@ namespace CoreServices.Controllers;
 public class ContactController: ControllerBase
 {
     private readonly QrzDataService _qrzDataService;
+    private readonly ILogger<ContactController> _logger;
     
-    public ContactController(QrzDataService qrzDataService)
+    public ContactController(QrzDataService qrzDataService, ILogger<ContactController> logger)
     {
         _qrzDataService = qrzDataService;
+        _logger = logger;
     }
     
     /// <summary>
@@ -41,17 +43,47 @@ public class ContactController: ControllerBase
         }
         //Try to do a lookup on the call and see if we can improve the grid accuracy to 6 chars.
         var callInfo = await _qrzDataService.GetCallDataAsync(contactInfo.DxCall);
-        if (callInfo.Session != null)
+        if (callInfo.Session != null && callInfo.Session.Length > 0)
         {
-            if (string.IsNullOrEmpty(callInfo.Session[0].Error))
+            var subExp = callInfo.Session[0].SubExp;
+            if (!string.IsNullOrEmpty(subExp) &&
+                DateTime.TryParseExact(subExp, "ddd MMM d HH:mm:ss yyyy", System.Globalization.CultureInfo.InvariantCulture,
+                    System.Globalization.DateTimeStyles.None, out var expDate) &&
+                expDate < DateTime.UtcNow)
             {
-                if (string.IsNullOrEmpty(contactInfo.DxGrid) || callInfo.Callsign[0].grid.StartsWith(contactInfo.DxGrid))
+                foreach (var qrzDatabaseSession in callInfo.Session)
+                {
+                    _logger.LogError("Session: {SessionMessage}, {SessionError}, {Remark}, {SubExp}", 
+                        qrzDatabaseSession.Message, qrzDatabaseSession.Error,qrzDatabaseSession.Remark, qrzDatabaseSession.SubExp );
+                }
+                return Problem($"QRZ subscription is expired as of {expDate:yyyy-MM-dd}.", statusCode: (int)HttpStatusCode.Forbidden);
+            }
+            
+            if (callInfo.Session.Any(x => !string.IsNullOrEmpty(x.Error)))
+            {
+                foreach (var error in callInfo.Session.Where(x => !string.IsNullOrEmpty(x.Error)))
+                {
+                    _logger.LogError("Session error: {Error}", error.Error);
+                }
+                return Problem(callInfo.Session.Select(x => x.Error).ToString());
+            }
+            
+            if (callInfo.Callsign.Length > 0 && callInfo.Callsign[0] != null && callInfo.Callsign[0].grid != null)
+            {
+                _logger.LogDebug("QRZ call information: {CallInfo}", callInfo.Callsign.ToString());
+                if (string.IsNullOrEmpty(contactInfo.DxGrid) || 
+                    callInfo.Callsign[0].grid.StartsWith(contactInfo.DxGrid))
                 {
                     //Use the lookup grid as it will be more accurate
                     contactInfo.DxGrid = callInfo.Callsign[0].grid;
                 }
             }
-            //If the call fails just use the input grids
+            else
+            {
+                _logger.LogError("Qrz returned no error, but Callsign info is missing or grid is null");
+            }
+            
+            //If the call fails, just use the input grids
         }
 
         if (contactInfo.DeGrid == string.Empty || contactInfo.DxGrid == string.Empty)

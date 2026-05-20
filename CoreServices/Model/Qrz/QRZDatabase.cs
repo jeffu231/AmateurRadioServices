@@ -541,6 +541,19 @@ namespace CoreServices.Model.Qrz {
                 this.name_fmtField = value;
             }
         }
+
+        public override string ToString() {
+            return $"call={call}, aliases={aliases}, dxcc={dxcc}, fname={fname}, name={name}, " +
+                   $"addr1={addr1}, addr2={addr2}, state={state}, zip={zip}, country={country}, " +
+                   $"lat={lat}, lon={lon}, grid={grid}, county={county}, ccode={ccode}, fips={fips}, " +
+                   $"land={land}, efdate={efdate}, expdate={expdate}, class={@class}, codes={codes}, " +
+                   $"qslmgr={qslmgr}, email={email}, u_views={u_views}, bio={bio}, biodate={biodate}, " +
+                   $"moddate={moddate}, MSA={MSA}, AreaCode={AreaCode}, TimeZone={TimeZone}, " +
+                   $"GMTOffset={GMTOffset}, DST={DST}, eqsl={eqsl}, mqsl={mqsl}, cqzone={cqzone}, " +
+                   $"ituzone={ituzone}, lotw={lotw}, geoloc={geoloc}, name_fmt={name_fmt}";
+        }
+
+
     }
     
     /// <remarks/>
