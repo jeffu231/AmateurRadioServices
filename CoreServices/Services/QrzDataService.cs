@@ -114,6 +114,11 @@ public class QrzDataService
             return sessionStatus.Item2 ?? CreateError("Error validating session", String.Empty);
         }
         
+        //Strip any /R or /P qualifiers on the end of the call.
+        call = call.ToUpper()
+            .Replace("/R", string.Empty)
+            .Replace("/P", string.Empty);
+        
         var tryCount = 0;
 
         while (true)
