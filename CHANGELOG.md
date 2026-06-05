@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/versionize/versionize) for commit guidelines.
 
+<a name="1.1.1"></a>
+## [1.1.1](https://www.github.com/jeffu231/AmateurRadioServices/releases/tag/v1.1.1) (2026-06-05)
+
+### Bug Fixes
+
+* Add logic to strip /R and /P from qrz lookups ([fc8bb48](https://www.github.com/jeffu231/AmateurRadioServices/commit/fc8bb484eac1630b560c42981f4208e0573ed18d))
+
 <a name="1.1.0"></a>
 ## [1.1.0](https://www.github.com/jeffu231/AmateurRadioServices/releases/tag/v1.1.0) (2026-05-20)
 
