@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/versionize/versionize) for commit guidelines.
 
+<a name="1.2.0"></a>
+## [1.2.0](https://www.github.com/jeffu231/AmateurRadioServices/releases/tag/v1.2.0) (2026-06-15)
+
+### Features
+
+* **AI:** Add agents files ([ec0feb9](https://www.github.com/jeffu231/AmateurRadioServices/commit/ec0feb91b2289c6f670c04ac420a4d138c07a553))
+* **Versioning:** Add Configuration endpoint to expose the service version ([6144037](https://www.github.com/jeffu231/AmateurRadioServices/commit/614403775098c2cdb2eb4461e1e91ea3587a88d7))
+
 <a name="1.1.2"></a>
 ## [1.1.2](https://www.github.com/jeffu231/AmateurRadioServices/releases/tag/v1.1.2) (2026-06-15)
 
