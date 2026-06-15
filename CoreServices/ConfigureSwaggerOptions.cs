@@ -2,6 +2,7 @@ using Asp.Versioning.ApiExplorer;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using System.Reflection;
 
 namespace CoreServices;
 
@@ -26,6 +27,8 @@ public class ConfigureSwaggerOptions : IConfigureNamedOptions<SwaggerGenOptions>
             options.SwaggerDoc(
                 description.GroupName,
                 CreateVersionInfo(description));
+
+        options.OperationFilter<ObsoleteOperationDescriptionFilter>();
     }
 
     /// <summary>
@@ -57,5 +60,22 @@ public class ConfigureSwaggerOptions : IConfigureNamedOptions<SwaggerGenOptions>
                 " This API version has been deprecated. Please use one of the new APIs available from the explorer.";
 
         return info;
+    }
+}
+
+public class ObsoleteOperationDescriptionFilter : IOperationFilter
+{
+    public void Apply(OpenApiOperation operation, OperationFilterContext context)
+    {
+        var obsoleteAttribute = context.MethodInfo.GetCustomAttribute<ObsoleteAttribute>();
+        if (obsoleteAttribute == null || string.IsNullOrWhiteSpace(obsoleteAttribute.Message))
+        {
+            return;
+        }
+
+        operation.Deprecated = true;
+        operation.Description = string.IsNullOrWhiteSpace(operation.Description)
+            ? obsoleteAttribute.Message
+            : $"{operation.Description}\n\nDeprecated: {obsoleteAttribute.Message}";
     }
 }

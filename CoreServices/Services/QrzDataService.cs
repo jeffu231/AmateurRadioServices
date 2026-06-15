@@ -113,59 +113,96 @@ public class QrzDataService
         {
             return sessionStatus.Item2 ?? CreateError("Error validating session", String.Empty);
         }
-        
-        //Strip any /R or /P qualifiers on the end of the call.
-        call = call.ToUpper()
-            .Replace("/R", string.Empty)
-            .Replace("/P", string.Empty);
-        
-        var tryCount = 0;
 
-        while (true)
+        var normalizedCall = NormalizeCallsign(call);
+        var database = await GetCallDataWithSessionRetryAsync(normalizedCall);
+        if (IsLookupSuccessful(database))
         {
-            tryCount++;
-            var keys = new Dictionary<string, string?>
-            {
-                ["s"] = _sessionToken,
-                ["callsign"] = call
-            };
-            try
-            {
-                var response = await _httpClient.GetAsync(QueryHelpers.AddQueryString("/xml/current", keys));
-               
-                var xml = await response.Content.ReadAsStringAsync();
-                _logger.LogDebug(xml);
-                
-                using StringReader reader = new StringReader(xml);
-                if (QrzDatabaseSerializer.Deserialize(reader) is QRZDatabase qrzDatabase)
-                {
-                    if (qrzDatabase.Session != null)
-                    {
-                        if (!string.IsNullOrEmpty(qrzDatabase.Session[0].Key))
-                        {
-                            //We got a good response since the key is populated.
-                            return qrzDatabase;
-                        }
-                        //Session is probably expired, so recreate it and try once again.
-                        _sessionToken = String.Empty;
-                        if (tryCount < 2)
-                        {
-                            await CreateSessionAsync();
-                            continue;
-                        }
-                        return qrzDatabase;
-                    }
-                }
-               
-                _logger.LogError(@"Failed to deserialize response from QRZ call search");
-                return CreateError("Call lookup failed.", @"Failed to deserialize response from QRZ call search" );
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex,@"Error calling QRZ call search");
-                return CreateError("Error calling QRZ call search", ex.Message);
-            }
+            return database;
         }
+
+        var fallbackCall = GetFallbackCallsign(normalizedCall);
+        return fallbackCall == null ? database : await GetCallDataWithSessionRetryAsync(fallbackCall);
+    }
+
+    private static string NormalizeCallsign(string call)
+    {
+        return call.Trim().ToUpperInvariant();
+    }
+
+    private static string? GetFallbackCallsign(string call)
+    {
+        if (call.EndsWith("/R") || call.EndsWith("/P"))
+        {
+            return call[..^2];
+        }
+
+        return null;
+    }
+
+    private async Task<QRZDatabase> GetCallDataWithSessionRetryAsync(string call)
+    {
+        const int maxAttempts = 2;
+
+        for (var attempt = 1; attempt <= maxAttempts; attempt++)
+        {
+            var database = await QueryCallDataAsync(call);
+            if (!ShouldRefreshSession(database) || attempt == maxAttempts)
+            {
+                return database;
+            }
+
+            _sessionToken = String.Empty;
+            await CreateSessionAsync();
+        }
+
+        return CreateError("Call lookup failed.", "Failed to call QRZ call search");
+    }
+
+    private async Task<QRZDatabase> QueryCallDataAsync(string call)
+    {
+        var keys = new Dictionary<string, string?>
+        {
+            ["s"] = _sessionToken,
+            ["callsign"] = call
+        };
+
+        try
+        {
+            var response = await _httpClient.GetAsync(QueryHelpers.AddQueryString("/xml/current", keys));
+            var xml = await response.Content.ReadAsStringAsync();
+            _logger.LogDebug(xml);
+
+            using StringReader reader = new StringReader(xml);
+            if (QrzDatabaseSerializer.Deserialize(reader) is QRZDatabase qrzDatabase)
+            {
+                return qrzDatabase;
+            }
+
+            _logger.LogError(@"Failed to deserialize response from QRZ call search");
+            return CreateError("Call lookup failed.", @"Failed to deserialize response from QRZ call search");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, @"Error calling QRZ call search");
+            return CreateError("Error calling QRZ call search", ex.Message);
+        }
+    }
+
+    private static bool IsLookupSuccessful(QRZDatabase database)
+    {
+        return database.Callsign is { Length: > 0 };
+    }
+
+    private static bool ShouldRefreshSession(QRZDatabase database)
+    {
+        if (database.Session is not { Length: > 0 })
+        {
+            return false;
+        }
+
+        var session = database.Session[0];
+        return string.IsNullOrEmpty(session.Key) && string.IsNullOrEmpty(session.Message);
     }
 
     private QRZDatabase CreateError(string error, string message)

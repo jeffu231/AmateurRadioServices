@@ -11,23 +11,48 @@ namespace CoreServices.Controllers;
 [ApiVersion("1.0")]
 public class CallsignController: ControllerBase
 {
+    private const string CallsignQueryEndpoint = "/api/ars/v{version}/Callsign?call={call}";
     private readonly QrzDataService _qrzDataService;
     
     public CallsignController(QrzDataService qrzDataService)
     {
         _qrzDataService = qrzDataService;
     }
-    
-    [HttpGet("{id}")]
+
+    [HttpGet]
     [MapToApiVersion("1.0")]
     [ProducesResponseType(typeof(QRZDatabase), (int)HttpStatusCode.OK)]
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
     [Produces("application/json")]
-    public async Task<IActionResult> GetCallDataByCallsign(string id)
+    public Task<IActionResult> GetCallDataByCallsignFromQuery([FromQuery] string call)
     {
-        if (!string.IsNullOrEmpty(id))
+        return GetCallDataByCallsignValue(call);
+    }
+    
+    [HttpGet("{*id}")]
+    [MapToApiVersion("1.0")]
+    [ProducesResponseType(typeof(QRZDatabase), (int)HttpStatusCode.OK)]
+    [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+    [Produces("application/json")]
+    [Obsolete("Use GET /api/ars/v{version}/Callsign?call={call}. The path-based endpoint cannot reliably carry encoded slashes.", false)]
+    public Task<IActionResult> GetCallDataByCallsign(string id)
+    {
+        AddLegacyPathDeprecationHeaders();
+        return GetCallDataByCallsignValue(id);
+    }
+
+    private void AddLegacyPathDeprecationHeaders()
+    {
+        Response.Headers["Deprecation"] = "true";
+        Response.Headers["Link"] = $"<{CallsignQueryEndpoint}>; rel=\"alternate\"";
+    }
+
+    private async Task<IActionResult> GetCallDataByCallsignValue(string call)
+    {
+        var decodedCall = WebUtility.UrlDecode(call);
+        if (!string.IsNullOrEmpty(decodedCall))
         {
-            var callInfo = await _qrzDataService.GetCallDataAsync(id);
+            var callInfo = await _qrzDataService.GetCallDataAsync(decodedCall);
             return Ok(callInfo);
         }
         
