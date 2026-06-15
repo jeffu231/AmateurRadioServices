@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/versionize/versionize) for commit guidelines.
 
+<a name="1.1.2"></a>
+## [1.1.2](https://www.github.com/jeffu231/AmateurRadioServices/releases/tag/v1.1.2) (2026-06-15)
+
+### Bug Fixes
+
+* Resolve aprs.fi from post to get ([ad6ac05](https://www.github.com/jeffu231/AmateurRadioServices/commit/ad6ac053a9d129b900b62b05c84f0a201c8c6390))
+* **qrz:** support suffix callsigns with query lookup ([25c2984](https://www.github.com/jeffu231/AmateurRadioServices/commit/25c2984d2e6e600b89eb335605d39ad8b4bdd3d4))
+
 <a name="1.1.1"></a>
 ## [1.1.1](https://www.github.com/jeffu231/AmateurRadioServices/releases/tag/v1.1.1) (2026-06-05)
 
