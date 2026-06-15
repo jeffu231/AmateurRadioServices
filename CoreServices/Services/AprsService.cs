@@ -1,5 +1,6 @@
 using System.Text.Json;
 using CoreServices.Model.Aprs;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Net.Http.Headers;
 
 namespace CoreServices.Services;
@@ -32,7 +33,7 @@ public class AprsService
     /// <returns>A location record. <see cref="AprsLocRecord"/></returns>
     public async Task<AprsLocRecord?> GetAprsLocRecordAsync(string id)
     {
-        var query = new Dictionary<string, string>
+        var query = new Dictionary<string, string?>
         { 
             ["what"] = "loc",
             ["format"] = "json",
@@ -42,8 +43,8 @@ public class AprsService
 
         try
         {
-            HttpContent content = new FormUrlEncodedContent(query);
-            var response = await _httpClient.PostAsync("/api/get", content);
+            string fullUrl = QueryHelpers.AddQueryString("/api/get", query);
+            var response = await _httpClient.GetAsync(fullUrl);
 
             if (response.IsSuccessStatusCode)
             {
