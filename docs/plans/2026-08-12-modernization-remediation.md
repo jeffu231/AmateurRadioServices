@@ -13,7 +13,7 @@ The delivery strategy is additive. Keep v1 routes running and do not silently su
 ## Progress
 
 - [x] (2026-08-12 00:00Z) Read `.agents/plans.md`, the modernization findings, the API startup/configuration, controllers, provider services, project file, and current GitHub Actions workflow.
-- [ ] Establish the test project, CI quality gates, and dependency remediation before changing public behavior.
+- [ ] Establish the test project, CI quality gates, and dependency remediation before changing public behavior (completed: test project, APRS regression test/fix, Swagger smoke test, dependency upgrade, and CI validation job; remaining: execute the full clean audit after package restore and record the result).
 - [ ] Remove secret/PII exposure, add validated options, authentication/rate-limit policy, and safe observability for both API versions.
 - [ ] Correct v1 defects that are safe and necessary to fix without changing the response schema; publish their release notes.
 - [ ] Add internal application/provider boundaries, cancellation, session coordination, and upstream resilience behind the v1 routes.
@@ -228,6 +228,17 @@ The intended sensitive-data contract boundary is:
 
     Logging receives only event name, status, duration, trace ID, and reviewed non-sensitive identifiers.
 
+First-milestone verification completed during this plan update:
+
+    dotnet build CoreServices.Tests/CoreServices.Tests.csproj --configuration Release --no-restore
+      Build succeeded. 0 Warning(s), 0 Error(s).
+
+    dotnet test CoreServices.sln --configuration Release --no-build
+      Passed!  - Failed: 0, Passed: 2, Skipped: 0, Total: 2
+
+    dotnet list CoreServices.sln package --vulnerable --include-transitive
+      No vulnerable packages reported.
+
 The intended v1/v2 coexistence is:
 
     Existing client -> /api/ars/v1/... -> v1 adapter -> application/provider boundary
@@ -257,3 +268,5 @@ Example v1-to-v2 migration table to include in `docs/api/v2-migration.md`:
 When this plan changes, update every impacted section above and append a dated note here describing the changed scope and why it changed.
 
 Plan created 2026-08-12 by Codex after reviewing the current repository and modernization findings. It is intentionally phased to protect active v1 consumers while correcting security defects immediately and making all externally visible modernization changes available through v2.
+
+Plan updated 2026-08-12 by Codex to record the implemented first-milestone baseline work. The milestone remains in progress until the upgraded dependency graph is restored and the complete Release build/test/audit sequence has passed.
