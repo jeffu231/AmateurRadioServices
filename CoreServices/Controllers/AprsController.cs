@@ -102,7 +102,7 @@ public class AprsController:ControllerBase
                 var grids = new List<AprsGrid>();
                 foreach (var recordEntry in record.Entries)
                 {
-                    var grid = MaidenheadLocator.LatLngToLocator(record.Entries[0].Lat, record.Entries[0].Lng);
+                    var grid = MaidenheadLocator.LatLngToLocator(recordEntry.Lat, recordEntry.Lng);
                     grids.Add(new AprsGrid(recordEntry.Name, grid));
                 }
        
