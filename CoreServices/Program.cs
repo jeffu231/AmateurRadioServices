@@ -1,7 +1,12 @@
 using System.Text.Json;
+using System.Threading.RateLimiting;
 using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
+using CoreServices.Infrastructure;
+using CoreServices.Integrations.Aprs;
+using CoreServices.Integrations.Qrz;
 using CoreServices.Services;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace CoreServices;
 
@@ -27,6 +32,7 @@ public static class Program
             })
             .AddXmlSerializerFormatters();
         
+        ConfigureOptions(builder);
         ConfigureApiVersioning(builder);
         
         ConfigureSwagger(builder);
@@ -38,18 +44,102 @@ public static class Program
             .SetHandlerLifetime(TimeSpan.FromMinutes(10));
         
         builder.Services.AddProblemDetails();
+        ConfigureRateLimiting(builder);
 
-        var app = builder.Build(); 
+        var app = builder.Build();
         
         EnableSwagger(app);
         
-        app.UseAuthorization();
-        
         app.UseExceptionHandler();
 
-        app.MapControllers();
+        app.UseRateLimiter();
+
+        app.UseAuthorization();
+
+        app.MapControllers().RequireRateLimiting("public-api");
 
         app.Run();
+    }
+
+    private static void ConfigureOptions(WebApplicationBuilder builder)
+    {
+        builder.Services.AddOptions<AprsOptions>()
+            .BindConfiguration("Aprs")
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+        builder.Services.PostConfigure<AprsOptions>(options =>
+        {
+            if (string.IsNullOrWhiteSpace(options.ApiKey))
+            {
+                options.ApiKey = builder.Configuration["AprsApiKey"] ?? string.Empty;
+            }
+        });
+
+        builder.Services.AddOptions<QrzOptions>()
+            .BindConfiguration("Qrz")
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+        builder.Services.PostConfigure<QrzOptions>(options =>
+        {
+            if (string.IsNullOrWhiteSpace(options.Username))
+            {
+                options.Username = builder.Configuration["QrzUsername"] ?? string.Empty;
+            }
+
+            if (string.IsNullOrWhiteSpace(options.Password))
+            {
+                options.Password = builder.Configuration["QrzPassword"] ?? string.Empty;
+            }
+
+            if (string.IsNullOrWhiteSpace(options.AgentIdentifier))
+            {
+                options.AgentIdentifier = builder.Configuration["AgentIdentifier"] ?? string.Empty;
+            }
+        });
+
+        builder.Services.AddOptions<RateLimitingOptions>()
+            .BindConfiguration("RateLimiting")
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+    }
+
+    private static void ConfigureRateLimiting(WebApplicationBuilder builder)
+    {
+        var configuredOptions = builder.Configuration.GetSection("RateLimiting").Get<RateLimitingOptions>()
+            ?? new RateLimitingOptions();
+
+        builder.Services.AddRateLimiter(options =>
+        {
+            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+            options.OnRejected = async (context, cancellationToken) =>
+            {
+                context.HttpContext.Response.Headers.RetryAfter = configuredOptions.WindowSeconds.ToString();
+                await Results.Problem(
+                        statusCode: StatusCodes.Status429TooManyRequests,
+                        title: "Too many requests.",
+                        type: "https://httpstatuses.com/429")
+                    .ExecuteAsync(context.HttpContext);
+            };
+            options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(_ =>
+                RateLimitPartition.GetConcurrencyLimiter(
+                    "all-requests",
+                    _ => new ConcurrencyLimiterOptions
+                    {
+                        PermitLimit = configuredOptions.GlobalConcurrencyPermitLimit,
+                        QueueLimit = 0,
+                        QueueProcessingOrder = QueueProcessingOrder.OldestFirst
+                    }));
+            options.AddPolicy("public-api", context =>
+                RateLimitPartition.GetFixedWindowLimiter(
+                    context.Connection.RemoteIpAddress?.ToString() ?? "unknown-client",
+                    _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = configuredOptions.PublicPermitLimit,
+                        Window = TimeSpan.FromSeconds(configuredOptions.WindowSeconds),
+                        QueueLimit = configuredOptions.QueueLimit,
+                        QueueProcessingOrder = QueueProcessingOrder.OldestFirst
+                    }));
+        });
     }
     
     private static void ConfigureApiVersioning(WebApplicationBuilder builder)

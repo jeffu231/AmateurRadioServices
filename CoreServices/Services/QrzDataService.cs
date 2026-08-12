@@ -1,6 +1,8 @@
 using System.Xml.Serialization;
+using CoreServices.Integrations.Qrz;
 using CoreServices.Model.Qrz;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 
 namespace CoreServices.Services;
@@ -15,18 +17,25 @@ public class QrzDataService
     private readonly HttpClient _httpClient;
     private static readonly XmlSerializer QrzDatabaseSerializer = new(typeof(QRZDatabase));
     private readonly ILogger<QrzDataService> _logger;
-    private readonly IConfiguration _config;
-
-    public QrzDataService(HttpClient httpClient, ILogger<QrzDataService> logger, IConfiguration config)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="QrzDataService"/> class.
+    /// </summary>
+    /// <param name="httpClient">The client used to call the QRZ provider.</param>
+    /// <param name="logger">The logger used to record sanitized provider events.</param>
+    /// <param name="options">The validated QRZ provider configuration.</param>
+    public QrzDataService(HttpClient httpClient, ILogger<QrzDataService> logger, IOptions<QrzOptions> options)
     {
+        ArgumentNullException.ThrowIfNull(httpClient);
+        ArgumentNullException.ThrowIfNull(logger);
+        ArgumentNullException.ThrowIfNull(options);
+
         _logger = logger;
-        _config = config;
-        _username = _config["QrzUsername"] ?? String.Empty;
-        _password = _config["QrzPassword"] ?? String.Empty;
-        _agent = _config["AgentIdentifier"] ?? "ARUv1.0";
+        _username = options.Value.Username;
+        _password = options.Value.Password;
+        _agent = options.Value.AgentIdentifier;
         _httpClient = httpClient;
-        _httpClient.BaseAddress = new Uri("https://xmldata.qrz.com");
-        _httpClient.DefaultRequestHeaders.Add(HeaderNames.UserAgent, "Mozilla/5.0");
+        _httpClient.BaseAddress = new Uri(options.Value.BaseAddress);
+        _httpClient.DefaultRequestHeaders.Add(HeaderNames.UserAgent, options.Value.UserAgent);
     }
     
     public DateTime SubscriptionExpirationTime => _subExpirationTime;
@@ -42,14 +51,13 @@ public class QrzDataService
             ["password"] = _password,
             ["agent"] = _agent
         };
-        _logger.LogInformation("Agent = {}", _config["AgentIdentifier"] ?? String.Empty);
+        _logger.LogInformation("Creating QRZ session for configured agent {AgentIdentifier}", _agent);
         try
         {
             HttpContent content = new FormUrlEncodedContent(query);
             var response = await _httpClient.PostAsync("/xml/current", content);
 
             var xml = await response.Content.ReadAsStringAsync();
-            _logger.LogDebug(xml);
             
             using StringReader reader = new StringReader(xml);
             if (QrzDatabaseSerializer.Deserialize(reader) is QRZDatabase qrzDatabase)
@@ -76,13 +84,13 @@ public class QrzDataService
                 return (false, qrzDatabase);
             }
             
-            _logger.LogError(@"Failed create session for QRZ");
+            _logger.LogError("QRZ session response could not be deserialized");
             return (false, CreateError("Error deserializing session", string.Empty));
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            _logger.LogError(@"Failed create session for QRZ");
-            return (false, CreateError("Error creating session", ex.Message));
+            _logger.LogError("QRZ session creation failed");
+            return (false, CreateError("Error creating session", string.Empty));
         }
     }
 
@@ -171,7 +179,6 @@ public class QrzDataService
         {
             var response = await _httpClient.GetAsync(QueryHelpers.AddQueryString("/xml/current", keys));
             var xml = await response.Content.ReadAsStringAsync();
-            _logger.LogDebug(xml);
 
             using StringReader reader = new StringReader(xml);
             if (QrzDatabaseSerializer.Deserialize(reader) is QRZDatabase qrzDatabase)
@@ -182,10 +189,10 @@ public class QrzDataService
             _logger.LogError(@"Failed to deserialize response from QRZ call search");
             return CreateError("Call lookup failed.", @"Failed to deserialize response from QRZ call search");
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            _logger.LogError(ex, @"Error calling QRZ call search");
-            return CreateError("Error calling QRZ call search", ex.Message);
+            _logger.LogError("QRZ callsign lookup failed");
+            return CreateError("Error calling QRZ call search", string.Empty);
         }
     }
 

@@ -1,11 +1,12 @@
 using CoreServices.Controllers;
+using CoreServices.Integrations.Aprs;
 using CoreServices.Model.Aprs;
 using CoreServices.Services;
 using CoreServices.Tests.Infrastructure;
 using MaidenheadLib;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
 using Xunit;
 
 namespace CoreServices.Tests;
@@ -27,7 +28,7 @@ public sealed class AprsControllerTests
         using var client = new HttpClient(new FixtureHttpMessageHandler(fixture));
         var service = new AprsService(
             NullLogger<AprsService>.Instance,
-            new ConfigurationBuilder().Build(),
+            Options.Create(new AprsOptions { ApiKey = "test-aprs-key" }),
             client);
         var controller = new AprsController(NullLogger<AprsController>.Instance, service);
 

@@ -1,5 +1,5 @@
 using System.Net;
-using Microsoft.AspNetCore.Mvc.Testing;
+using CoreServices.Tests.Infrastructure;
 using Xunit;
 
 namespace CoreServices.Tests;
@@ -7,7 +7,7 @@ namespace CoreServices.Tests;
 /// <summary>
 /// Verifies that the application produces its versioned OpenAPI document.
 /// </summary>
-public sealed class SwaggerDocumentTests(WebApplicationFactory<ApiEntryPoint> factory) : IClassFixture<WebApplicationFactory<ApiEntryPoint>>
+public sealed class SwaggerDocumentTests(ApiWebApplicationFactory factory) : IClassFixture<ApiWebApplicationFactory>
 {
     /// <summary>
     /// Serves the v1 OpenAPI document from the configured Swagger route.
