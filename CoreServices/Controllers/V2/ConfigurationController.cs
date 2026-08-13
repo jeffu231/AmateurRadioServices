@@ -3,7 +3,7 @@ using Asp.Versioning;
 using CoreServices.Contracts.V2;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CoreServices.Controllers;
+namespace CoreServices.Controllers.V2;
 
 /// <summary>
 /// Provides v2 configuration metadata.
@@ -11,7 +11,7 @@ namespace CoreServices.Controllers;
 [ApiController]
 [Route("api/ars/v{version:apiVersion}/configuration")]
 [ApiVersion("2.0")]
-public sealed class V2ConfigurationController : ControllerBase
+public sealed class ConfigurationController : ControllerBase
 {
     /// <summary>
     /// Gets the running application version.

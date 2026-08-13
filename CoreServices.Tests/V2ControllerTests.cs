@@ -1,4 +1,4 @@
-using CoreServices.Controllers;
+using CoreServices.Controllers.V2;
 using CoreServices.Integrations.Qrz;
 using CoreServices.Model.Qrz;
 using CoreServices.Tests.Infrastructure;
@@ -20,7 +20,7 @@ public sealed class V2ControllerTests
     {
         // Arrange
         IQrzClient qrzClient = new StubQrzClient(new QRZDatabase());
-        var controller = new V2CallsignsController(qrzClient);
+        var controller = new CallsignController(qrzClient);
 
         // Act
         var result = await controller.GetAsync("UNKNOWN", CancellationToken.None);

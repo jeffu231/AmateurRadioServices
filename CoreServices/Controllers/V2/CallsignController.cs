@@ -4,7 +4,7 @@ using CoreServices.Contracts.V2;
 using CoreServices.Integrations.Qrz;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CoreServices.Controllers;
+namespace CoreServices.Controllers.V2;
 
 /// <summary>
 /// Provides stable v2 callsign lookup responses.
@@ -12,7 +12,7 @@ namespace CoreServices.Controllers;
 [ApiController]
 [Route("api/ars/v{version:apiVersion}/callsigns")]
 [ApiVersion("2.0")]
-public sealed class V2CallsignsController(IQrzClient qrzClient) : ControllerBase
+public sealed class CallsignController(IQrzClient qrzClient) : ControllerBase
 {
     /// <summary>
     /// Gets the supported public details for one callsign.

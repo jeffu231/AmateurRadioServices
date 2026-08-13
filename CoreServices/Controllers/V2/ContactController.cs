@@ -4,7 +4,7 @@ using CoreServices.Contracts.V2;
 using CoreServices.Validation;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CoreServices.Controllers;
+namespace CoreServices.Controllers.V2;
 
 /// <summary>
 /// Provides stable v2 contact enhancement operations.
@@ -12,7 +12,7 @@ namespace CoreServices.Controllers;
 [ApiController]
 [Route("api/ars/v{version:apiVersion}/contacts")]
 [ApiVersion("2.0")]
-public sealed class V2ContactsController(ContactEnhancer contactEnhancer) : ControllerBase
+public sealed class ContactController(ContactEnhancer contactEnhancer) : ControllerBase
 {
     /// <summary>
     /// Enhances a contact with a QRZ grid and calculated bearing when available.

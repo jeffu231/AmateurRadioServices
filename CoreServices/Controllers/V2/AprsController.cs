@@ -7,7 +7,7 @@ using CoreServices.Validation;
 using MaidenheadLib;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CoreServices.Controllers;
+namespace CoreServices.Controllers.V2;
 
 /// <summary>
 /// Provides stable v2 APRS location resources.
@@ -15,7 +15,7 @@ namespace CoreServices.Controllers;
 [ApiController]
 [Route("api/ars/v{version:apiVersion}/aprs/locations")]
 [ApiVersion("2.0")]
-public sealed class V2AprsController(IAprsClient aprsClient) : ControllerBase
+public sealed class AprsController(IAprsClient aprsClient) : ControllerBase
 {
     /// <summary>
     /// Gets APRS locations for a query-string comma-separated callsign list.
