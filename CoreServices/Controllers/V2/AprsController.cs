@@ -42,7 +42,13 @@ public sealed class AprsController(IAprsClient aprsClient) : ControllerBase
             DestinationCallsign = entry.DstCall,
             Latitude = entry.Lat,
             Longitude = entry.Lng,
-            Comment = entry.Comment
+            Comment = entry.Comment,
+            Path = entry.Path,
+            Type = entry.Type,
+            Time = entry.Time,
+            LastTime = entry.LastTime,
+            Class = entry.Class,
+            Symbol = entry.Symbol
         }).ToArray());
 
     /// <summary>

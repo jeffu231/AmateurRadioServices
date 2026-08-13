@@ -33,7 +33,13 @@ public sealed class V2ApiWebApplicationFactory : WebApplicationFactory<ApiEntryP
                     SrcCall = "N9NOC/P",
                     Lat = 41.8781,
                     Lng = -87.6298,
-                    Comment = "test location"
+                    Comment = "test location",
+                    Path = "WIDE1-1,WIDE2-1",
+                    Type = "l",
+                    Time = 1_723_579_600,
+                    LastTime = 1_723_579_540,
+                    Class = "a",
+                    Symbol = "/>"
                 }]
             }));
             services.AddSingleton<IQrzClient>(new StubQrzClient(new QRZDatabase

@@ -43,8 +43,11 @@ field v1 returns, including address, email, license, geographic, QSL, zone,
 and profile fields. The response deliberately omits the QRZ `session` object,
 session key, subscription metadata, and provider messages.
 
-APRS responses use `name`, `latitude`, `longitude`, and the route-specific
-fields. Contact responses keep the logical v1 names (`deCall`, `deGrid`,
+The v2 APRS location response contains every station-entry field v1 returns:
+`name`, `sourceCallsign`, `destinationCallsign`, `latitude`, `longitude`,
+`comment`, `path`, `type`, `time`, `lastTime`, `class`, and `symbol`. It omits
+only the APRS provider wrapper/status fields. Coordinate and grid routes
+intentionally return their route-specific subsets. Contact responses keep the logical v1 names (`deCall`, `deGrid`,
 `dxCall`, `dxGrid`, `bearing`) but are new immutable values; blank grids return
 a successful response with `bearing: null`. Non-empty grids must be valid
 four-, six-, or eight-character Maidenhead locators. `dxCall`, when provided,

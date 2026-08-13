@@ -22,4 +22,22 @@ public sealed record AprsLocationResponse
 
     /// <summary>Gets the APRS comment.</summary>
     public required string Comment { get; init; }
+
+    /// <summary>Gets the APRS packet path.</summary>
+    public required string Path { get; init; }
+
+    /// <summary>Gets the APRS station type.</summary>
+    public required string Type { get; init; }
+
+    /// <summary>Gets the APRS packet timestamp as Unix time.</summary>
+    public long Time { get; init; }
+
+    /// <summary>Gets the prior APRS packet timestamp as Unix time.</summary>
+    public long LastTime { get; init; }
+
+    /// <summary>Gets the APRS station class.</summary>
+    public required string Class { get; init; }
+
+    /// <summary>Gets the APRS map symbol.</summary>
+    public required string Symbol { get; init; }
 }

@@ -99,8 +99,15 @@ public sealed class V2ApiIntegrationTests(V2ApiWebApplicationFactory factory) : 
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        var json = await response.Content.ReadAsStringAsync();
-        Assert.Contains("N9NOC/P", json, StringComparison.Ordinal);
+        using var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        var location = document.RootElement[0];
+        Assert.Equal("N9NOC/P", location.GetProperty("name").GetString());
+        Assert.Equal("WIDE1-1,WIDE2-1", location.GetProperty("path").GetString());
+        Assert.Equal("l", location.GetProperty("type").GetString());
+        Assert.Equal(1_723_579_600, location.GetProperty("time").GetInt64());
+        Assert.Equal(1_723_579_540, location.GetProperty("lastTime").GetInt64());
+        Assert.Equal("a", location.GetProperty("class").GetString());
+        Assert.Equal("/>", location.GetProperty("symbol").GetString());
     }
 
     /// <summary>
