@@ -8,6 +8,8 @@
         <Authors>Jeff Uchitjil</Authors>
         <Version>1.2.0</Version>
         <RepositoryUrl>https://github.com/jeffu231/AmateurRadioServices</RepositoryUrl>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <NoWarn>$(NoWarn);1591</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>

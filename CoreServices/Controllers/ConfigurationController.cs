@@ -1,26 +1,30 @@
 using System.Net;
 using System.Reflection;
 using Asp.Versioning;
+using CoreServices.Contracts.V1;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CoreServices.Controllers;
 
+/// <summary>
+/// Provides application configuration metadata.
+/// </summary>
 [ApiController]
 [Route("api/ars/v{version:apiVersion}/[controller]")]
 [ApiVersion("1.0")]
-public class ConfigurationController:ControllerBase
+public sealed class ConfigurationController : ControllerBase
 {
     /// <summary>
-    /// Get the version of the application
+    /// Gets the version of the application.
     /// </summary>
-    /// <returns>Application Version</returns>
+    /// <returns>The application version response.</returns>
     [HttpGet("version")]
     [MapToApiVersion("1.0")]
-    [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(ConfigurationVersionResponse), (int)HttpStatusCode.OK)]
     [Produces("application/json")]
     public IActionResult GetVersion()
     {
         var version = Assembly.GetEntryAssembly()?.GetName().Version?.ToString();
-        return Ok(new { ApplicationVersion = version });
+        return Ok(new ConfigurationVersionResponse { ApplicationVersion = version });
     }
 }

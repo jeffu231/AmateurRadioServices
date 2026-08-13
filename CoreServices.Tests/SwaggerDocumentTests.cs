@@ -25,4 +25,21 @@ public sealed class SwaggerDocumentTests(ApiWebApplicationFactory factory) : ICl
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Equal("application/json", response.Content.Headers.ContentType?.MediaType);
     }
+
+    /// <summary>
+    /// Rejects XML negotiation because v1 only documents JSON responses.
+    /// </summary>
+    [Fact]
+    public async Task GetConfigurationVersion_WhenXmlIsRequested_ReturnsNotAcceptable()
+    {
+        // Arrange
+        using var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Accept.ParseAdd("application/xml");
+
+        // Act
+        var response = await client.GetAsync("/api/ars/v1/configuration/version");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.NotAcceptable, response.StatusCode);
+    }
 }

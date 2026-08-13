@@ -14,12 +14,13 @@ public class DataServiceController(IQrzSessionProvider qrzSessionProvider, ILogg
     /// <summary>
     /// This operation returns the subscription expiration date time when there is a valid session.
     /// </summary>
-    /// <returns><see cref="DateTime"/> Expiration Date Time</returns>
+    /// <param name="cancellationToken">The token that can cancel the request.</param>
+    /// <returns>The QRZ subscription expiration date and time.</returns>
     [HttpGet("SubscriptionExpirationTime")]
     [MapToApiVersion("1.0")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(DateTime), (int)HttpStatusCode.OK)]
-    [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), (int)HttpStatusCode.InternalServerError)]
     public async Task<IActionResult> SubscriptionExpirationTime(CancellationToken cancellationToken)
     {
         var session = await qrzSessionProvider.GetSessionAsync(cancellationToken);

@@ -30,8 +30,7 @@ public static class Program
                 // If you want camelCase JSON (similar to your previous Newtonsoft camel-case usage)
                 opts.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
                 opts.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
-            })
-            .AddXmlSerializerFormatters();
+            });
         
         ConfigureOptions(builder);
         ConfigureApiVersioning(builder);
