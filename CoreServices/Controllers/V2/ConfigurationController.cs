@@ -11,6 +11,7 @@ namespace CoreServices.Controllers.V2;
 [ApiController]
 [Route("api/ars/v{version:apiVersion}/configuration")]
 [ApiVersion("2.0")]
+[Produces("application/json")]
 public sealed class ConfigurationController : ControllerBase
 {
     /// <summary>

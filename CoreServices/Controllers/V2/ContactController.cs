@@ -12,6 +12,7 @@ namespace CoreServices.Controllers.V2;
 [ApiController]
 [Route("api/ars/v{version:apiVersion}/contacts")]
 [ApiVersion("2.0")]
+[Produces("application/json")]
 public sealed class ContactController(ContactEnhancer contactEnhancer) : ControllerBase
 {
     /// <summary>

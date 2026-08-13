@@ -11,7 +11,7 @@ are complete. No v1 sunset or removal date is currently scheduled.
 
 | v1 route | v2 route | Client change |
 | --- | --- | --- |
-| `GET /api/ars/v1/Callsign?call={call}` | `GET /api/ars/v2/callsigns?callsign={call}` | Read the smaller callsign DTO; handle non-2xx results. |
+| `GET /api/ars/v1/Callsign?call={call}` | `GET /api/ars/v2/callsign?callsign={call}` | Read the matching callsign-record fields; handle non-2xx results. |
 | `GET /api/ars/v1/Aprs/loc/{id}` | `GET /api/ars/v2/aprs/locations?callsigns={callsigns}` | Use a URL-encoded, comma-separated callsign list. |
 | `GET /api/ars/v1/Aprs/loc/{id}/coord` | `GET /api/ars/v2/aprs/locations/coordinates?callsigns={callsigns}` | Read `latitude` and `longitude`. |
 | `GET /api/ars/v1/Aprs/loc/{id}/grid` | `GET /api/ars/v2/aprs/locations/grids?callsigns={callsigns}` | Read each station's independently calculated grid. |
@@ -38,10 +38,10 @@ proxies; do not use a callsign in the v2 route path.
 
 ## Contract changes
 
-V2 returns only purpose-built JSON contracts. `CallsignLookupResponse` has
-`callsign`, `firstName`, `name`, `state`, `country`, and `grid`. It deliberately
-omits QRZ `session`, session keys, subscription expiration, provider messages,
-email, street address, ZIP code, biography, and raw provider payload fields.
+V2 returns a purpose-built callsign contract containing every callsign-record
+field v1 returns, including address, email, license, geographic, QSL, zone,
+and profile fields. The response deliberately omits the QRZ `session` object,
+session key, subscription metadata, and provider messages.
 
 APRS responses use `name`, `latitude`, `longitude`, and the route-specific
 fields. Contact responses keep the logical v1 names (`deCall`, `deGrid`,

@@ -38,7 +38,48 @@ public sealed class V2ApiWebApplicationFactory : WebApplicationFactory<ApiEntryP
             }));
             services.AddSingleton<IQrzClient>(new StubQrzClient(new QRZDatabase
             {
-                Callsign = [new QRZDatabaseCallsign { call = "N9NOC", grid = "EN61" }]
+                Callsign = [new QRZDatabaseCallsign
+                {
+                    call = "N9NOC",
+                    aliases = "N9NOC/P",
+                    dxcc = "291",
+                    fname = "Alex",
+                    name = "Operator",
+                    addr1 = "123 Main Street",
+                    addr2 = "Suite 4",
+                    state = "IL",
+                    zip = "60601",
+                    country = "United States",
+                    lat = "41.8781",
+                    lon = "-87.6298",
+                    grid = "EN61",
+                    county = "Cook",
+                    ccode = "US",
+                    fips = "17031",
+                    land = "United States",
+                    efdate = "2020-01-01",
+                    expdate = "2030-01-01",
+                    @class = "Amateur Extra",
+                    codes = "HVIE",
+                    qslmgr = "N9NOC",
+                    email = "alex@example.test",
+                    u_views = "42",
+                    bio = "Test operator",
+                    biodate = "2026-01-01",
+                    moddate = "2026-08-13",
+                    MSA = "Chicago",
+                    AreaCode = "312",
+                    TimeZone = "America/Chicago",
+                    GMTOffset = "-6",
+                    DST = "Y",
+                    eqsl = "1",
+                    mqsl = "1",
+                    cqzone = "4",
+                    ituzone = "8",
+                    lotw = "1",
+                    geoloc = "41.8781,-87.6298",
+                    name_fmt = "Alex Operator"
+                }]
             }));
         });
     }

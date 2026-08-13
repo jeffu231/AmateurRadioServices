@@ -15,6 +15,7 @@ namespace CoreServices.Controllers.V2;
 [ApiController]
 [Route("api/ars/v{version:apiVersion}/aprs/locations")]
 [ApiVersion("2.0")]
+[Produces("application/json")]
 public sealed class AprsController(IAprsClient aprsClient) : ControllerBase
 {
     /// <summary>
