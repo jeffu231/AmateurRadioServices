@@ -1,7 +1,7 @@
 using System.Net;
 using Asp.Versioning;
 using CoreServices.Model;
-using CoreServices.Services;
+using CoreServices.Integrations.Qrz;
 using MaidenheadLib;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,28 +12,29 @@ namespace CoreServices.Controllers;
 [ApiVersion("1.0")]
 public class ContactController: ControllerBase
 {
-    private readonly QrzDataService _qrzDataService;
+    private readonly IQrzClient _qrzClient;
     private readonly ILogger<ContactController> _logger;
     
-    public ContactController(QrzDataService qrzDataService, ILogger<ContactController> logger)
+    public ContactController(IQrzClient qrzClient, ILogger<ContactController> logger)
     {
-        _qrzDataService = qrzDataService;
+        _qrzClient = qrzClient;
         _logger = logger;
     }
-    
+
     /// <summary>
     /// This operation tries to enhance the existing contact info by doing a lookup of the DxCall and if the DxGrid is
     /// missing, or the first 4 chars of the DxGrid match the lookup, the lookup grid is used. A new bearing will be
-    /// calculated. If the the contact info cannot be enhanced, the original information is returned.
+    /// calculated. If the contact info cannot be enhanced, the original information is returned.
     /// </summary>
     /// <param name="contactInfo"></param>
+    /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpPost("EnhanceBearing")]
     [MapToApiVersion("1.0")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(ContactInfo), (int)HttpStatusCode.OK)]
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-    public async Task<IActionResult> EnhanceBearing([FromBody] ContactInfo contactInfo)
+    public async Task<IActionResult> EnhanceBearing([FromBody] ContactInfo contactInfo, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(contactInfo.DxCall))
         {
@@ -41,7 +42,7 @@ public class ContactController: ControllerBase
             return Ok(contactInfo);
         }
         //Try to do a lookup on the call and see if we can improve the grid accuracy to 6 chars.
-        var callInfo = await _qrzDataService.GetCallDataAsync(contactInfo.DxCall);
+        var callInfo = await _qrzClient.GetCallDataAsync(contactInfo.DxCall, cancellationToken);
         if (callInfo.Session != null && callInfo.Session.Length > 0)
         {
             var subExp = callInfo.Session[0].SubExp;

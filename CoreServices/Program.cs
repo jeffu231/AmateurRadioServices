@@ -6,7 +6,8 @@ using CoreServices.Infrastructure;
 using CoreServices.Integrations.Aprs;
 using CoreServices.Integrations.Qrz;
 using CoreServices.Services;
-using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Http.Resilience;
+using Microsoft.Extensions.Options;
 
 namespace CoreServices;
 
@@ -37,11 +38,7 @@ public static class Program
         
         ConfigureSwagger(builder);
         
-        builder.Services.AddHttpClient<QrzDataService>()
-            .SetHandlerLifetime(TimeSpan.FromMinutes(10));
-
-        builder.Services.AddHttpClient<AprsService>()
-            .SetHandlerLifetime(TimeSpan.FromMinutes(10));
+        ConfigureProviderClients(builder);
         
         builder.Services.AddProblemDetails();
         var rateLimitingOptions = builder.Configuration.GetSection("RateLimiting").Get<RateLimitingOptions>()
@@ -113,6 +110,45 @@ public static class Program
             .BindConfiguration("RateLimiting")
             .ValidateDataAnnotations()
             .ValidateOnStart();
+    }
+
+    private static void ConfigureProviderClients(WebApplicationBuilder builder)
+    {
+        builder.Services.AddSingleton<IQrzSessionProvider, QrzSessionProvider>();
+        builder.Services.AddHttpClient<IAprsClient, AprsService>((services, client) =>
+            ConfigureAprsHttpClient(client, services.GetRequiredService<IOptions<AprsOptions>>().Value))
+            .SetHandlerLifetime(TimeSpan.FromMinutes(10))
+            .AddStandardResilienceHandler(ConfigureResilience);
+        builder.Services.AddHttpClient<IQrzClient, QrzDataService>((services, client) =>
+            ConfigureQrzHttpClient(client, services.GetRequiredService<IOptions<QrzOptions>>().Value))
+            .SetHandlerLifetime(TimeSpan.FromMinutes(10))
+            .AddStandardResilienceHandler(ConfigureResilience);
+        builder.Services.AddHttpClient("qrz-session", (services, client) =>
+            ConfigureQrzHttpClient(client, services.GetRequiredService<IOptions<QrzOptions>>().Value))
+            .SetHandlerLifetime(TimeSpan.FromMinutes(10))
+            .AddStandardResilienceHandler(ConfigureResilience);
+    }
+
+    private static void ConfigureAprsHttpClient(HttpClient client, AprsOptions options)
+    {
+        client.BaseAddress = new Uri(options.BaseAddress);
+        client.Timeout = TimeSpan.FromSeconds(options.TimeoutSeconds);
+        client.DefaultRequestHeaders.UserAgent.ParseAdd(options.UserAgent);
+        client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
+    }
+
+    private static void ConfigureQrzHttpClient(HttpClient client, QrzOptions options)
+    {
+        client.BaseAddress = new Uri(options.BaseAddress);
+        client.Timeout = TimeSpan.FromSeconds(options.TimeoutSeconds);
+        client.DefaultRequestHeaders.UserAgent.ParseAdd(options.UserAgent);
+        client.DefaultRequestHeaders.Accept.ParseAdd("application/xml");
+    }
+
+    private static void ConfigureResilience(HttpStandardResilienceOptions options)
+    {
+        options.Retry.MaxRetryAttempts = 1;
+        options.Retry.DisableForUnsafeHttpMethods();
     }
 
     private static void ConfigureRateLimiting(WebApplicationBuilder builder, RateLimitingOptions configuredOptions)

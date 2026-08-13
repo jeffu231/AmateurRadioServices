@@ -25,15 +25,18 @@ public sealed class AprsControllerTests
         // Arrange
         var fixturePath = Path.Combine(AppContext.BaseDirectory, "Fixtures", "aprs-multiple-locations.json");
         var fixture = await File.ReadAllTextAsync(fixturePath);
-        using var client = new HttpClient(new FixtureHttpMessageHandler(fixture));
+        using var client = new HttpClient(new FixtureHttpMessageHandler(fixture))
+        {
+            BaseAddress = new Uri("https://test.aprs.local")
+        };
         var service = new AprsService(
-            NullLogger<AprsService>.Instance,
+            client,
             Options.Create(new AprsOptions { ApiKey = "test-aprs-key" }),
-            client);
+            NullLogger<AprsService>.Instance);
         var controller = new AprsController(NullLogger<AprsController>.Instance, service);
 
         // Act
-        var result = await controller.GetGrid("K1AAA,K2BBB");
+        var result = await controller.GetGrid("K1AAA,K2BBB", CancellationToken.None);
 
         // Assert
         var objectResult = Assert.IsType<OkObjectResult>(result);

@@ -1,7 +1,7 @@
 using System.Net;
 using Asp.Versioning;
 using CoreServices.Model.Aprs;
-using CoreServices.Services;
+using CoreServices.Integrations.Aprs;
 using MaidenheadLib;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,12 +13,12 @@ namespace CoreServices.Controllers;
 public class AprsController:ControllerBase
 {
     private readonly ILogger<AprsController> _logger;
-    private readonly AprsService _aprsService;
+    private readonly IAprsClient _aprsClient;
     
-    public AprsController(ILogger<AprsController> logger, AprsService aprsService)
+    public AprsController(ILogger<AprsController> logger, IAprsClient aprsClient)
     {
         _logger = logger;
-        _aprsService = aprsService;
+        _aprsClient = aprsClient;
     }
     
     [HttpGet("loc/{id}")]
@@ -26,14 +26,14 @@ public class AprsController:ControllerBase
     [ProducesResponseType(typeof(AprsLocRecord), (int)HttpStatusCode.OK)]
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
     [Produces("application/json")]
-    public async Task<IActionResult> Get(string id)
+    public async Task<IActionResult> Get(string id, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(id))
         {
             return BadRequest("Invalid search criteria. Must be one or more calls seperated by a comma.");
         }
 
-        AprsLocRecord? record = await _aprsService.GetAprsLocRecordAsync(id);
+        AprsLocRecord? record = await _aprsClient.GetAprsLocRecordAsync(id, cancellationToken);
 
         if (record != null)
         {
@@ -49,14 +49,14 @@ public class AprsController:ControllerBase
     [ProducesResponseType(typeof(List<AprsCoordinate>), (int)HttpStatusCode.OK)]
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
     [Produces("application/json")]
-    public async Task<IActionResult> GetCoord(string id)
+    public async Task<IActionResult> GetCoord(string id, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(id))
         {
             return BadRequest("Invalid search criteria. Must be one or more calls seperated by a comma.");
         }
 
-        AprsLocRecord? record = await _aprsService.GetAprsLocRecordAsync(id);
+        AprsLocRecord? record = await _aprsClient.GetAprsLocRecordAsync(id, cancellationToken);
 
         if (record != null)
         {
@@ -86,14 +86,14 @@ public class AprsController:ControllerBase
     [Produces("application/json")]
     [ProducesResponseType(typeof(List<AprsGrid>), (int)HttpStatusCode.OK)]
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-    public async Task<IActionResult> GetGrid(string id)
+    public async Task<IActionResult> GetGrid(string id, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(id))
         {
             return BadRequest("Invalid search criteria. Must be one or more calls seperated by a comma.");
         }
 
-        AprsLocRecord? record = await _aprsService.GetAprsLocRecordAsync(id);
+        AprsLocRecord? record = await _aprsClient.GetAprsLocRecordAsync(id, cancellationToken);
 
         if (record != null)
         {

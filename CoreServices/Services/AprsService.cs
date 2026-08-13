@@ -3,97 +3,85 @@ using CoreServices.Integrations.Aprs;
 using CoreServices.Model.Aprs;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
-using Microsoft.Net.Http.Headers;
 
 namespace CoreServices.Services;
 
-public class AprsService
+/// <summary>
+/// Performs APRS location lookups while preserving the existing v1 response model.
+/// </summary>
+public sealed class AprsService(
+    HttpClient httpClient,
+    IOptions<AprsOptions> options,
+    ILogger<AprsService> logger) : IAprsClient
 {
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        PropertyNameCaseInsensitive = true
-    };
-    
-    private readonly string _aprsApiKey;
-    private readonly ILogger<AprsService> _logger;
-    private readonly HttpClient _httpClient;
-    
-    /// <summary>
-    /// Initializes a new instance of the <see cref="AprsService"/> class.
-    /// </summary>
-    /// <param name="logger">The logger used to record sanitized provider events.</param>
-    /// <param name="options">The validated APRS provider configuration.</param>
-    /// <param name="httpClient">The client used to call the APRS provider.</param>
-    public AprsService(ILogger<AprsService> logger, IOptions<AprsOptions> options, HttpClient httpClient)
-    {
-        ArgumentNullException.ThrowIfNull(logger);
-        ArgumentNullException.ThrowIfNull(options);
-        ArgumentNullException.ThrowIfNull(httpClient);
+    private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
 
-        _logger = logger;
-        _httpClient = httpClient;
-        _httpClient.BaseAddress = new Uri(options.Value.BaseAddress);
-        _httpClient.DefaultRequestHeaders.Add(HeaderNames.UserAgent, options.Value.UserAgent);
-        _httpClient.DefaultRequestHeaders.Add(HeaderNames.Accept, "application/json");
-        _aprsApiKey = options.Value.ApiKey;
-    }
-    
-    /// <summary>
-    /// Makes a lookup to aprs.fi to find location info for the given call
-    /// </summary>
-    /// <param name="id">Call identifier used in APRS packets</param>
-    /// <returns>A location record. <see cref="AprsLocRecord"/></returns>
-    public async Task<AprsLocRecord?> GetAprsLocRecordAsync(string id)
+    /// <inheritdoc />
+    public async Task<AprsLocRecord?> GetAprsLocRecordAsync(string id, CancellationToken cancellationToken)
     {
-        var query = new Dictionary<string, string?>
-        { 
+        var query = QueryHelpers.AddQueryString("/api/get", new Dictionary<string, string?>
+        {
             ["what"] = "loc",
             ["format"] = "json",
             ["name"] = id,
-            ["apikey"] = _aprsApiKey
-        };
+            ["apikey"] = options.Value.ApiKey
+        });
+        using var request = new HttpRequestMessage(HttpMethod.Get, query);
 
         try
         {
-            string fullUrl = QueryHelpers.AddQueryString("/api/get", query);
-            var response = await _httpClient.GetAsync(fullUrl);
-
-            if (response.IsSuccessStatusCode)
+            using var response = await httpClient.SendAsync(
+                    request,
+                    HttpCompletionOption.ResponseHeadersRead,
+                    cancellationToken)
+                .ConfigureAwait(false);
+            if (!response.IsSuccessStatusCode)
             {
-                var contentStream = await response.Content.ReadAsStreamAsync();
-                
-                AprsLocRecord? record = DeserializeFromStream<AprsLocRecord>(contentStream);
-                if (record != null)
-                {
-                    record.Description = "Success";
-                }
+                logger.LogWarning("APRS location lookup returned HTTP status {StatusCode}", (int)response.StatusCode);
+                return CreateError("APRS location lookup is unavailable.");
+            }
+
+            await response.Content.LoadIntoBufferAsync(options.Value.ResponseSizeLimitBytes, cancellationToken)
+                .ConfigureAwait(false);
+            await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+            var record = await JsonSerializer.DeserializeAsync<AprsLocRecord>(stream, JsonOptions, cancellationToken)
+                .ConfigureAwait(false);
+            if (record is not null)
+            {
+                record.Description = "Success";
                 return record;
             }
-            
-            _logger.LogError("Response code {Code}", response.StatusCode);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed trying APRS");
-            return CreateError(ex.Message);
-        }
 
-        return CreateError("Unknown Error");
-    }
-    
-    private AprsLocRecord CreateError(string message)
-    {
-        return new AprsLocRecord()
+            logger.LogWarning("APRS location lookup returned an invalid payload");
+            return CreateError("APRS location lookup returned an invalid payload.");
+        }
+        catch (HttpRequestException exception)
         {
-            Found = 0,
-            Command = "loc",
-            Result = "fail",
-            Description = message
-        };
+            logger.LogWarning(exception, "APRS location lookup failed");
+            return CreateError("APRS location lookup is unavailable.");
+        }
+        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+        {
+            logger.LogWarning("APRS location lookup timed out");
+            return CreateError("APRS location lookup timed out.");
+        }
+        catch (InvalidOperationException exception)
+        {
+            logger.LogWarning(exception, "APRS location lookup response was invalid or too large");
+            return CreateError("APRS location lookup returned an invalid payload.");
+        }
+        catch (JsonException exception)
+        {
+            logger.LogWarning(exception, "APRS location lookup returned an invalid payload");
+            return CreateError("APRS location lookup returned an invalid payload.");
+        }
     }
-    
-    private static T? DeserializeFromStream<T>(Stream stream)
+
+    private static AprsLocRecord CreateError(string message) => new()
     {
-        return JsonSerializer.Deserialize<T>(stream, JsonOptions);
-    }
+        Found = 0,
+        Command = "loc",
+        Result = "fail",
+        Description = message
+    };
 }

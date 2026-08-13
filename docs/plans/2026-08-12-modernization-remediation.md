@@ -16,7 +16,7 @@ The delivery strategy is additive. Keep v1 routes running and do not silently su
 - [x] (2026-08-12 00:00Z) Establish the test project, CI quality gates, and dependency remediation before changing public behavior.
 - [x] (2026-08-12 00:00Z) Redact secrets from logging and API session data, add validated options, public-service rate-limit policy, and safe observability for both API versions.
 - [ ] Correct v1 defects that are safe and necessary to fix without changing the response schema; publish their release notes.
-- [ ] Add internal application/provider boundaries, cancellation, session coordination, and upstream resilience behind the v1 routes.
+- [x] (2026-08-13 00:00Z) Add internal application/provider boundaries, cancellation, session coordination, and upstream resilience behind the v1 routes.
 - [ ] Release the v2 contracts and endpoints in parallel with v1, including migration documentation and deprecation signals.
 - [ ] Harden deployment and observe production migration before proposing a v1 retirement date.
 
@@ -274,3 +274,5 @@ Plan updated 2026-08-12 by Codex to record the implemented first-milestone basel
 Plan updated 2026-08-12 by Codex to record the completed second milestone. The deployment remains intentionally public to avoid an unversioned authentication break for active v1 consumers; it now has direct-client and global rate protection, while any authentication mechanism is deferred to a versioned v2 migration. Existing v1 QRZ contact data remains for compatibility; v2 will introduce a minimal public callsign contract.
 
 Plan updated 2026-08-12 by Codex to make rate limiting explicitly configurable for private deployments. `RateLimiting__Enabled` defaults to `true`; setting it to `false` removes both middleware and endpoint enforcement after restart, so it is documented as appropriate only with equivalent network-level quota protection.
+
+Plan updated 2026-08-13 by Codex to record the completed third milestone. Provider interfaces now isolate v1 HTTP controllers from APRS/QRZ transports; QRZ session state is a lock-protected singleton with per-process scope and a five-minute refresh margin. The HTTP resilience policy permits one retry only for safe methods, while QRZ session POSTs are excluded. The first application result mapper is added for v2 adoption; v1 successful payloads remain unchanged.
