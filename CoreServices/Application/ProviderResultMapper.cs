@@ -37,11 +37,16 @@ public static class ProviderResultMapper
             _ => (StatusCodes.Status500InternalServerError, "An unexpected error occurred.")
         };
 
-        return new ObjectResult(new ProblemDetails
+        var problem = new ProblemDetails
         {
             Status = statusCode,
             Title = title
-        })
+        };
+        problem.Extensions["traceId"] = controller.ControllerContext?.HttpContext?.TraceIdentifier
+            ?? System.Diagnostics.Activity.Current?.Id
+            ?? string.Empty;
+
+        return new ObjectResult(problem)
         {
             StatusCode = statusCode
         };

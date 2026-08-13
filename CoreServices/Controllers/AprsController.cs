@@ -138,10 +138,13 @@ public sealed class AprsController(ILogger<AprsController> logger, IAprsClient a
         return NotFound("Record not found.");
     }
 
-    private IActionResult InvalidIdentifierList() => BadRequest(new ValidationProblemDetails(new Dictionary<string, string[]>
+    private IActionResult InvalidIdentifierList()
     {
-        ["id"] = ["Provide between one and 25 unique APRS identifiers, each no longer than 16 characters."]
-    }));
+        return BadRequest(new ValidationProblemDetails(new Dictionary<string, string[]>
+        {
+            ["id"] = ["Provide between one and 25 unique APRS identifiers, each no longer than 16 characters."]
+        }));
+    }
 
     private static bool IsValidCoordinate(double latitude, double longitude) =>
         double.IsFinite(latitude) && double.IsFinite(longitude) &&

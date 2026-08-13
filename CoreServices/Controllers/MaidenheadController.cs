@@ -10,7 +10,7 @@ namespace CoreServices.Controllers;
 [ApiController]
 [Route("api/ars/v{version:apiVersion}/[controller]")]
 [ApiVersion("1.0")]
-public sealed class MaidenheadController(ILogger<MaidenheadController> logger) : ControllerBase
+public sealed class MaidenheadController : ControllerBase
 {
     [HttpGet]
     [Route("bearing")]
@@ -47,7 +47,6 @@ public sealed class MaidenheadController(ILogger<MaidenheadController> logger) :
             return Ok(distance);
         }
         
-        logger.LogWarning("Invalid grid pair on request. src:{Lat} dest:{Lon}", srcGrid, destGrid);
         return InvalidGridPair();
     }
 
@@ -61,7 +60,6 @@ public sealed class MaidenheadController(ILogger<MaidenheadController> logger) :
     {
         if (!double.IsFinite(lat) || !double.IsFinite(lon) || lat is < -90 or > 90 || lon is < -180 or > 180)
         {
-            logger.LogWarning("Invalid coordinates on request. Lat:{Lat} Long:{Lon}", lat, lon);
             return BadRequest(new ValidationProblemDetails(new Dictionary<string, string[]>
             {
                 ["coordinates"] = ["Latitude must be between -90 and 90 and longitude must be between -180 and 180."]
@@ -77,8 +75,11 @@ public sealed class MaidenheadController(ILogger<MaidenheadController> logger) :
         MaidenheadGridValidator.IsValid(sourceGrid.Trim().ToUpperInvariant()) &&
         MaidenheadGridValidator.IsValid(destinationGrid.Trim().ToUpperInvariant());
 
-    private IActionResult InvalidGridPair() => BadRequest(new ValidationProblemDetails(new Dictionary<string, string[]>
+    private IActionResult InvalidGridPair()
     {
-        ["grid"] = ["Source and destination grids must be valid four-, six-, or eight-character Maidenhead values."]
-    }));
+        return BadRequest(new ValidationProblemDetails(new Dictionary<string, string[]>
+        {
+            ["grid"] = ["Source and destination grids must be valid four-, six-, or eight-character Maidenhead values."]
+        }));
+    }
 }

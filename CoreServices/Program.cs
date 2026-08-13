@@ -3,6 +3,7 @@ using System.Threading.RateLimiting;
 using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
 using CoreServices.Infrastructure;
+using CoreServices.Application;
 using CoreServices.Integrations.Aprs;
 using CoreServices.Integrations.Qrz;
 using CoreServices.Services;
@@ -38,6 +39,7 @@ public static class Program
         ConfigureSwagger(builder);
         
         ConfigureProviderClients(builder);
+        builder.Services.AddScoped<ContactEnhancer>();
         
         builder.Services.AddProblemDetails();
         var rateLimitingOptions = builder.Configuration.GetSection("RateLimiting").Get<RateLimitingOptions>()
@@ -49,8 +51,8 @@ public static class Program
 
         var app = builder.Build();
         
+        app.UseMiddleware<FailedRequestLoggingMiddleware>();
         EnableSwagger(app);
-        
         app.UseExceptionHandler();
 
         if (rateLimitingOptions.Enabled)
@@ -189,20 +191,11 @@ public static class Program
     private static void ConfigureApiVersioning(WebApplicationBuilder builder)
     {
         builder.Services.AddApiVersioning(options =>
-        {
-            options.ReportApiVersions = true;
-            options.DefaultApiVersion = new ApiVersion(1, 0);
-            options.AssumeDefaultVersionWhenUnspecified = true;
-            options.ApiVersionReader = ApiVersionReader.Combine(new UrlSegmentApiVersionReader(),
-                new HeaderApiVersionReader("x-api-version"));
-        });
-            
-        // Add ApiExplorer to discover versions
-        builder.Services.AddApiVersioning(options =>
             {
                 options.DefaultApiVersion = new ApiVersion(1, 0);
                 options.AssumeDefaultVersionWhenUnspecified = true;
                 options.ReportApiVersions = true;
+                options.ApiVersionReader = new UrlSegmentApiVersionReader();
             })
             .AddApiExplorer(options =>
             {
