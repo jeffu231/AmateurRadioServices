@@ -44,7 +44,12 @@ public static class Program
             .SetHandlerLifetime(TimeSpan.FromMinutes(10));
         
         builder.Services.AddProblemDetails();
-        ConfigureRateLimiting(builder);
+        var rateLimitingOptions = builder.Configuration.GetSection("RateLimiting").Get<RateLimitingOptions>()
+            ?? new RateLimitingOptions();
+        if (rateLimitingOptions.Enabled)
+        {
+            ConfigureRateLimiting(builder, rateLimitingOptions);
+        }
 
         var app = builder.Build();
         
@@ -52,11 +57,18 @@ public static class Program
         
         app.UseExceptionHandler();
 
-        app.UseRateLimiter();
+        if (rateLimitingOptions.Enabled)
+        {
+            app.UseRateLimiter();
+        }
 
         app.UseAuthorization();
 
-        app.MapControllers().RequireRateLimiting("public-api");
+        var controllers = app.MapControllers();
+        if (rateLimitingOptions.Enabled)
+        {
+            controllers.RequireRateLimiting("public-api");
+        }
 
         app.Run();
     }
@@ -103,11 +115,8 @@ public static class Program
             .ValidateOnStart();
     }
 
-    private static void ConfigureRateLimiting(WebApplicationBuilder builder)
+    private static void ConfigureRateLimiting(WebApplicationBuilder builder, RateLimitingOptions configuredOptions)
     {
-        var configuredOptions = builder.Configuration.GetSection("RateLimiting").Get<RateLimitingOptions>()
-            ?? new RateLimitingOptions();
-
         builder.Services.AddRateLimiter(options =>
         {
             options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;

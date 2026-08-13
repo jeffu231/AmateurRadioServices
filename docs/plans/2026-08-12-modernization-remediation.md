@@ -272,3 +272,5 @@ Plan created 2026-08-12 by Codex after reviewing the current repository and mode
 Plan updated 2026-08-12 by Codex to record the implemented first-milestone baseline work. The milestone remains in progress until the upgraded dependency graph is restored and the complete Release build/test/audit sequence has passed.
 
 Plan updated 2026-08-12 by Codex to record the completed second milestone. The deployment remains intentionally public to avoid an unversioned authentication break for active v1 consumers; it now has direct-client and global rate protection, while any authentication mechanism is deferred to a versioned v2 migration. Existing v1 QRZ contact data remains for compatibility; v2 will introduce a minimal public callsign contract.
+
+Plan updated 2026-08-12 by Codex to make rate limiting explicitly configurable for private deployments. `RateLimiting__Enabled` defaults to `true`; setting it to `false` removes both middleware and endpoint enforcement after restart, so it is documented as appropriate only with equivalent network-level quota protection.
