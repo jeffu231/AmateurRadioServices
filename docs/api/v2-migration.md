@@ -18,6 +18,9 @@ are complete. No v1 sunset or removal date is currently scheduled.
 | `POST /api/ars/v1/Contact/EnhanceBearing` | `POST /api/ars/v2/contacts/enhance-bearing`                        | Send/receive immutable DTOs and handle validation. |
 | `GET /api/ars/v1/Configuration/version` | `GET /api/ars/v2/configuration/version`                            | Read the documented version DTO. |
 | `GET /api/ars/v1/DataService/SubscriptionExpirationTime` | `GET /api/ars/v2/configuration/qrz/subscription-expiration`        | Read the `subscriptionExpiration` object property. |
+| `GET /api/ars/v1/Maidenhead/bearing?srcGrid={src}&destGrid={dest}` | `GET /api/ars/v2/maidenhead/bearing?srcGrid={src}&destGrid={dest}` | Read the JSON `bearing` property. |
+| `GET /api/ars/v1/Maidenhead/distance?srcGrid={src}&destGrid={dest}` | `GET /api/ars/v2/maidenhead/distance?srcGrid={src}&destGrid={dest}` | Read JSON `miles` and `kilometers` properties. |
+| `GET /api/ars/v1/Maidenhead/grid?lat={lat}&lon={lon}` | `GET /api/ars/v2/maidenhead/grid?lat={lat}&lon={lon}` | Read the JSON `grid` property. |
 
 The legacy path callsign route remains deprecated. Use the v1 query route
 during any interim period, then move directly to the v2 route.
@@ -44,7 +47,7 @@ field v1 returns, including address, email, license, geographic, QSL, zone,
 and profile fields. The response deliberately omits the QRZ `session` object,
 session key, subscription metadata, and provider messages.
 
-`GET /api/ars/v2/configuration/subscription-expiration` deliberately exposes
+`GET /api/ars/v2/configuration/qrz/subscription-expiration` deliberately exposes
 only the required QRZ subscription expiration timestamp. It does not expose a
 session object, token, request count, provider messages, or other session data.
 
@@ -57,6 +60,11 @@ intentionally return their route-specific subsets. Contact responses keep the lo
 a successful response with `bearing: null`. Non-empty grids must be valid
 four-, six-, or eight-character Maidenhead locators. `dxCall`, when provided,
 must be non-blank and at most 16 characters.
+
+V2 Maidenhead calculations return JSON objects: `bearing` is rounded degrees,
+`distance` has rounded `miles` and `kilometers`, and `grid` contains the
+calculated locator. The routes validate grid locator format and coordinate
+ranges before calculating a response.
 
 Representative success response:
 

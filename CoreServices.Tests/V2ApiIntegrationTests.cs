@@ -81,6 +81,33 @@ public sealed class V2ApiIntegrationTests(V2ApiWebApplicationFactory factory) : 
     }
 
     /// <summary>
+    /// Returns stable JSON contracts for v2 Maidenhead calculations.
+    /// </summary>
+    [Fact]
+    public async Task GetMaidenheadCalculations_ReturnsJsonContracts()
+    {
+        // Arrange
+        using var client = factory.CreateClient();
+
+        // Act
+        var bearingResponse = await client.GetAsync("/api/ars/v2/maidenhead/bearing?srcGrid=EN61&destGrid=FN31");
+        var distanceResponse = await client.GetAsync("/api/ars/v2/maidenhead/distance?srcGrid=EN61&destGrid=FN31");
+        var gridResponse = await client.GetAsync("/api/ars/v2/maidenhead/grid?lat=41.8781&lon=-87.6298");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, bearingResponse.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, distanceResponse.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, gridResponse.StatusCode);
+        using var bearing = JsonDocument.Parse(await bearingResponse.Content.ReadAsStringAsync());
+        using var distance = JsonDocument.Parse(await distanceResponse.Content.ReadAsStringAsync());
+        using var grid = JsonDocument.Parse(await gridResponse.Content.ReadAsStringAsync());
+        Assert.True(bearing.RootElement.GetProperty("bearing").GetInt32() is >= 0 and <= 360);
+        Assert.True(distance.RootElement.GetProperty("miles").GetInt32() > 0);
+        Assert.True(distance.RootElement.GetProperty("kilometers").GetInt32() > 0);
+        Assert.False(string.IsNullOrWhiteSpace(grid.RootElement.GetProperty("grid").GetString()));
+    }
+
+    /// <summary>
     /// Returns the same QRZ callsign-record data as v1 without a session object.
     /// </summary>
     [Fact]

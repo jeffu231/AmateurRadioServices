@@ -290,3 +290,5 @@ Plan updated 2026-08-13 by Codex to expand the v2 callsign contract to match the
 Plan updated 2026-08-13 by Codex to expand the v2 APRS location contract to match every v1 APRS station-entry field. The v2 response continues to omit only the APRS provider wrapper/status fields; the coordinate and grid routes retain their intentionally focused response shapes.
 
 Plan updated 2026-08-13 by Codex to add the explicitly approved QRZ subscription expiration as a v2 configuration resource. It exposes only the UTC expiration timestamp through a dedicated DTO and does not expose the QRZ session object, key, request count, provider messages, or other session data.
+
+Plan updated 2026-08-13 by Codex to migrate the Maidenhead bearing, distance, and grid utilities to v2. Each route has a stable JSON DTO, uses the existing bounded grid and coordinate validation, and runs beside its v1 counterpart without changing the v1 payloads or content negotiation.
