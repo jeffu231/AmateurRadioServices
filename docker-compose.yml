@@ -12,12 +12,23 @@ services:
     networks:
       - traefik-net
     environment:
-      - QrzUsername=${QrzUsername}
-      - QrzPassword=${QrzPassword}
-      - AprsApiKey=${AprsApiKey}
+      - Qrz__Username=${QrzUsername}
+      - Qrz__Password=${QrzPassword}
+      - Aprs__ApiKey=${AprsApiKey}
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-T", "5", "--spider", "http://127.0.0.1:8080/health/live"]
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.amateur-radio-utilities-api.rule=Host(`$HOSTNAME`) && (PathPrefix(`/api/ars/`))"
+      - "traefik.http.routers.amateur-radio-utilities-api.service=amateur-radio-api"
+      - "traefik.http.services.amateur-radio-api.loadbalancer.server.port=8080"
+      - "traefik.http.services.amateur-radio-api.loadbalancer.healthcheck.path=/health/ready"
+      - "traefik.http.services.amateur-radio-api.loadbalancer.healthcheck.interval=30s"
+      - "traefik.http.services.amateur-radio-api.loadbalancer.healthcheck.timeout=5s"
 
 networks:
   traefik-net:

@@ -579,6 +579,7 @@ namespace CoreServices.Model.Qrz {
         private string messageField;
         
         /// <remarks/>
+        [System.Text.Json.Serialization.JsonIgnore]
         public string Key {
             get {
                 return this.keyField;

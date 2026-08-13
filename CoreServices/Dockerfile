@@ -1,21 +1,22 @@
-﻿FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
+﻿FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS base
 WORKDIR /app
 EXPOSE 8080
 
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine AS build
 WORKDIR /src
 COPY ["CoreServices/CoreServices.csproj", "CoreServices/"]
 RUN dotnet restore "CoreServices/CoreServices.csproj"
 COPY . .
 WORKDIR "/src/CoreServices"
-RUN dotnet build "CoreServices.csproj" -c Release -o /app/build
+RUN dotnet build "CoreServices.csproj" -c Release --no-restore
 
 FROM build AS publish
-RUN dotnet publish "CoreServices.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "CoreServices.csproj" -c Release --no-build -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+USER $APP_UID
 ENTRYPOINT ["dotnet", "CoreServices.dll"]
 
 LABEL org.opencontainers.image.source=https://github.com/jeffu231/AmateurRadioServices

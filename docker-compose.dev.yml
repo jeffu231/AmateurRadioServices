@@ -1,5 +1,7 @@
 services:
   amateur-radio-services:
+    image: amateur-radio-api-dev
+    container_name: amateur-radio-api-dev
     build: 
       context: .
       dockerfile: CoreServices/Dockerfile

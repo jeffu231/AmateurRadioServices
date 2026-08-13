@@ -1,6 +1,6 @@
 using System.Net;
 using Asp.Versioning;
-using CoreServices.Services;
+using CoreServices.Integrations.Qrz;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CoreServices.Controllers;
@@ -8,30 +8,28 @@ namespace CoreServices.Controllers;
 [ApiController]
 [Route("api/ars/v{version:apiVersion}/[controller]")]
 [ApiVersion("1.0")]
-public class DataServiceController(QrzDataService qrzDataService, ILogger<DataServiceController> logger)
+public class DataServiceController(IQrzSessionProvider qrzSessionProvider, ILogger<DataServiceController> logger)
     : ControllerBase
 {
     /// <summary>
     /// This operation returns the subscription expiration date time when there is a valid session.
     /// </summary>
-    /// <returns><see cref="DateTime"/> Expiration Date Time</returns>
+    /// <param name="cancellationToken">The token that can cancel the request.</param>
+    /// <returns>The QRZ subscription expiration date and time.</returns>
     [HttpGet("SubscriptionExpirationTime")]
     [MapToApiVersion("1.0")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(DateTime), (int)HttpStatusCode.OK)]
-    [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-    public async Task<IActionResult> SubscriptionExpirationTime()
+    [ProducesResponseType(typeof(ProblemDetails), (int)HttpStatusCode.InternalServerError)]
+    public async Task<IActionResult> SubscriptionExpirationTime(CancellationToken cancellationToken)
     {
-        if (!qrzDataService.IsSessionActive)
+        var session = await qrzSessionProvider.GetSessionAsync(cancellationToken);
+        if (session is null)
         {
-            var response = await qrzDataService.CreateSessionAsync();
-            if (!response.success)
-            {
-                logger.LogError("Error creating session");
-                return Problem("The session was not valid.");
-            }
+            logger.LogError("QRZ session could not be established");
+            return Problem("The session was not valid.");
         }
         
-        return Ok(qrzDataService.SubscriptionExpirationTime);
+        return Ok(session.SubscriptionExpiration.UtcDateTime);
     }
 }

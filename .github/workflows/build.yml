@@ -1,24 +1,35 @@
 name: Build and Publish Image to GitHub Container Registry
 
 on:
-  # trigger manual
+  pull_request:
+    paths:
+      - 'CoreServices/**'
+      - 'CoreServices.Tests/**'
+      - 'CoreServices.sln'
+      - 'global.json'
+      - 'docker-compose*.yml'
+      - '.github/workflows/**'
   workflow_dispatch:
   push:
     branches:
       - master
     paths:
       - 'CoreServices/**'
+      - 'CoreServices.Tests/**'
+      - 'CoreServices.sln'
+      - 'global.json'
+      - 'docker-compose*.yml'
+      - '.github/workflows/**'
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  publish:
+  validate:
     runs-on: ubuntu-latest
     permissions:
-      packages: write
-      contents: write
+      contents: read
     
     steps:
       - name: Checkout
@@ -33,12 +44,53 @@ jobs:
           source-url: https://nuget.pkg.github.com/jeffu231/index.json
         env:
           NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-          
+
       - name: Display dotnet version
         run: dotnet --version
         
-      - name: Install Dependencies
-        run: dotnet restore
+      - name: Restore dependencies
+        run: dotnet restore CoreServices.sln
+
+      - name: Build
+        run: dotnet build CoreServices.sln --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test CoreServices.sln --configuration Release --no-build
+
+      - name: Audit vulnerable packages
+        shell: bash
+        run: |
+          set -o pipefail
+          dotnet list CoreServices.sln package --vulnerable --include-transitive 2>&1 | tee vulnerabilities.txt
+          if grep -Eqi 'NU1903|NU1904' vulnerabilities.txt; then
+            echo "High or critical vulnerable packages were found."
+            exit 1
+          fi
+
+  publish:
+    needs: validate
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET Core SDK
+        uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+          source-url: https://nuget.pkg.github.com/jeffu231/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+      - name: Restore dependencies
+        run: dotnet restore CoreServices.sln
 
       - name: Setup git
         run: |
@@ -81,7 +133,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish and push the container Image
         run: |
-          dotnet publish -c Release /p:PublishProfile=github
+          dotnet publish CoreServices/CoreServices.csproj -c Release --no-restore /p:PublishProfile=github
           
       - name: create release info
         if: steps.versionize.outcome == 'success'
