@@ -9,14 +9,15 @@ are complete. No v1 sunset or removal date is currently scheduled.
 
 ## Route map
 
-| v1 route | v2 route | Client change |
-| --- | --- | --- |
-| `GET /api/ars/v1/Callsign?call={call}` | `GET /api/ars/v2/callsign?callsign={call}` | Read the matching callsign-record fields; handle non-2xx results. |
-| `GET /api/ars/v1/Aprs/loc/{id}` | `GET /api/ars/v2/aprs/locations?callsigns={callsigns}` | Use a URL-encoded, comma-separated callsign list. |
+| v1 route | v2 route                                                           | Client change |
+| --- |--------------------------------------------------------------------| --- |
+| `GET /api/ars/v1/Callsign?call={call}` | `GET /api/ars/v2/callsign?callsign={call}`                         | Read the matching callsign-record fields; handle non-2xx results. |
+| `GET /api/ars/v1/Aprs/loc/{id}` | `GET /api/ars/v2/aprs/locations?callsigns={callsigns}`             | Use a URL-encoded, comma-separated callsign list. |
 | `GET /api/ars/v1/Aprs/loc/{id}/coord` | `GET /api/ars/v2/aprs/locations/coordinates?callsigns={callsigns}` | Read `latitude` and `longitude`. |
-| `GET /api/ars/v1/Aprs/loc/{id}/grid` | `GET /api/ars/v2/aprs/locations/grids?callsigns={callsigns}` | Read each station's independently calculated grid. |
-| `POST /api/ars/v1/Contact/EnhanceBearing` | `POST /api/ars/v2/contacts/enhance-bearing` | Send/receive immutable DTOs and handle validation. |
-| `GET /api/ars/v1/Configuration/version` | `GET /api/ars/v2/configuration/version` | Read the documented version DTO. |
+| `GET /api/ars/v1/Aprs/loc/{id}/grid` | `GET /api/ars/v2/aprs/locations/grids?callsigns={callsigns}`       | Read each station's independently calculated grid. |
+| `POST /api/ars/v1/Contact/EnhanceBearing` | `POST /api/ars/v2/contacts/enhance-bearing`                        | Send/receive immutable DTOs and handle validation. |
+| `GET /api/ars/v1/Configuration/version` | `GET /api/ars/v2/configuration/version`                            | Read the documented version DTO. |
+| `GET /api/ars/v1/DataService/SubscriptionExpirationTime` | `GET /api/ars/v2/configuration/qrz/subscription-expiration`        | Read the `subscriptionExpiration` object property. |
 
 The legacy path callsign route remains deprecated. Use the v1 query route
 during any interim period, then move directly to the v2 route.
@@ -42,6 +43,10 @@ V2 returns a purpose-built callsign contract containing every callsign-record
 field v1 returns, including address, email, license, geographic, QSL, zone,
 and profile fields. The response deliberately omits the QRZ `session` object,
 session key, subscription metadata, and provider messages.
+
+`GET /api/ars/v2/configuration/subscription-expiration` deliberately exposes
+only the required QRZ subscription expiration timestamp. It does not expose a
+session object, token, request count, provider messages, or other session data.
 
 The v2 APRS location response contains every station-entry field v1 returns:
 `name`, `sourceCallsign`, `destinationCallsign`, `latitude`, `longitude`,

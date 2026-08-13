@@ -24,6 +24,7 @@ public sealed class V2ApiWebApplicationFactory : WebApplicationFactory<ApiEntryP
         {
             services.RemoveAll<IAprsClient>();
             services.RemoveAll<IQrzClient>();
+            services.RemoveAll<IQrzSessionProvider>();
             services.AddSingleton<IAprsClient>(new StubAprsClient(new AprsLocRecord
             {
                 Found = 1,
@@ -87,6 +88,8 @@ public sealed class V2ApiWebApplicationFactory : WebApplicationFactory<ApiEntryP
                     name_fmt = "Alex Operator"
                 }]
             }));
+            services.AddSingleton<IQrzSessionProvider>(new StubQrzSessionProvider(
+                new QrzSession("test-session-token", new DateTimeOffset(2027, 1, 2, 3, 4, 5, TimeSpan.Zero))));
         });
     }
 }

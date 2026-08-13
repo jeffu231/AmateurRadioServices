@@ -61,6 +61,26 @@ public sealed class V2ApiIntegrationTests(V2ApiWebApplicationFactory factory) : 
     }
 
     /// <summary>
+    /// Returns the QRZ subscription expiration without exposing session material.
+    /// </summary>
+    [Fact]
+    public async Task GetSubscriptionExpiration_ReturnsExpirationOnly()
+    {
+        // Arrange
+        using var client = factory.CreateClient();
+
+        // Act
+        var response = await client.GetAsync("/api/ars/v2/configuration/qrz/subscription-expiration");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        using var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        Assert.Equal("2027-01-02T03:04:05+00:00", document.RootElement.GetProperty("subscriptionExpiration").GetString());
+        Assert.False(document.RootElement.TryGetProperty("token", out _));
+        Assert.False(document.RootElement.TryGetProperty("session", out _));
+    }
+
+    /// <summary>
     /// Returns the same QRZ callsign-record data as v1 without a session object.
     /// </summary>
     [Fact]

@@ -288,3 +288,5 @@ Plan updated 2026-08-13 by Codex to record the completed sixth milestone impleme
 Plan updated 2026-08-13 by Codex to expand the v2 callsign contract to match the v1 QRZ callsign-record fields. The v2 contract remains an explicit DTO and continues to omit the QRZ session object, session key, subscription metadata, and provider messages.
 
 Plan updated 2026-08-13 by Codex to expand the v2 APRS location contract to match every v1 APRS station-entry field. The v2 response continues to omit only the APRS provider wrapper/status fields; the coordinate and grid routes retain their intentionally focused response shapes.
+
+Plan updated 2026-08-13 by Codex to add the explicitly approved QRZ subscription expiration as a v2 configuration resource. It exposes only the UTC expiration timestamp through a dedicated DTO and does not expose the QRZ session object, key, request count, provider messages, or other session data.
