@@ -10,7 +10,7 @@ namespace CoreServices.Controllers.V2;
 /// Provides stable v2 callsign lookup responses.
 /// </summary>
 [ApiController]
-[Route("api/ars/v{version:apiVersion}/callsigns")]
+[Route("api/ars/v{version:apiVersion}/callsign")]
 [ApiVersion("2.0")]
 public sealed class CallsignController(IQrzClient qrzClient) : ControllerBase
 {
@@ -27,6 +27,7 @@ public sealed class CallsignController(IQrzClient qrzClient) : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status502BadGateway)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status503ServiceUnavailable)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status504GatewayTimeout)]
+    [Produces("application/json")]
     public async Task<ActionResult<CallsignLookupResponse>> GetAsync(
         [FromQuery] string callsign,
         CancellationToken cancellationToken)
