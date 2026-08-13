@@ -2,6 +2,35 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/versionize/versionize) for commit guidelines.
 
+<a name="1.3.0"></a>
+## [1.3.0](https://www.github.com/jeffu231/AmateurRadioServices/releases/tag/v1.3.0) (2026-08-13)
+
+### Features
+
+* **CI:** Update build for unit tests ([6194ad1](https://www.github.com/jeffu231/AmateurRadioServices/commit/6194ad128dec8223aa611898e5baf86d41bb8abd))
+* **health:** Add deployment health checks ([8f72e8a](https://www.github.com/jeffu231/AmateurRadioServices/commit/8f72e8a64f86d0e7c188137ae93341a8c11dd660))
+* **integrations:** Harden provider reliability ([e0fa552](https://www.github.com/jeffu231/AmateurRadioServices/commit/e0fa552f17212fbe751e9bf3dc0da6c65c80495c))
+* **security:** Add public API quota protection ([2ceff2d](https://www.github.com/jeffu231/AmateurRadioServices/commit/2ceff2de9a911965a3e1b07cd0340968c35f4389))
+* **security:** Add public API quota protection ([9db4303](https://www.github.com/jeffu231/AmateurRadioServices/commit/9db43034d9c02acb9ea407aa2ea90f607581e161))
+* **v2:** Add Maidenhead calculation routes ([2acd312](https://www.github.com/jeffu231/AmateurRadioServices/commit/2acd3123f132b7aa3058dfeb51d81b0a14815ecc))
+* **v2:** Add v2 QRZ subscription endpoint ([1e630d1](https://www.github.com/jeffu231/AmateurRadioServices/commit/1e630d173676c04674b6916d0c055a3b12cd3879))
+* **v2:** Add versioned API contracts ([4a76366](https://www.github.com/jeffu231/AmateurRadioServices/commit/4a76366fe814456768c91f201a7dac521036d6ca))
+
+### Bug Fixes
+
+* **api:** Fix the name of the v2 callsign endpoint ([6788a83](https://www.github.com/jeffu231/AmateurRadioServices/commit/6788a83c9ce311af5c47b5bbc2de01c3b44c3bd7))
+* **APRS:** Fixed APRS multi-result grid calculation ([764a593](https://www.github.com/jeffu231/AmateurRadioServices/commit/764a593b2ac4e7fc353197942d0c714a6ddb165a))
+* **docker:** Provide a specific container name for dev images ([06291ee](https://www.github.com/jeffu231/AmateurRadioServices/commit/06291ee7363115b4502342d3c659a500ef819b34))
+* **v1:** Stabilize legacy API behavior ([0d2ce5f](https://www.github.com/jeffu231/AmateurRadioServices/commit/0d2ce5fabf214df14c1fe6920f4008de9b1f608a))
+* **v2:** Complete APRS location response ([ca1ce4c](https://www.github.com/jeffu231/AmateurRadioServices/commit/ca1ce4c73f97d514a5b593e166a17fd92a413a85))
+* **v2:** Match callsign response fields ([c470ccd](https://www.github.com/jeffu231/AmateurRadioServices/commit/c470ccd87404f31cbb06aa3adce234a2254ba037))
+
+### Documentation
+
+* Initial remediation and review plan ([f7ea6fa](https://www.github.com/jeffu231/AmateurRadioServices/commit/f7ea6fa5733dbfc935176b7e018b21c409816bf0))
+* **AI:** Add agent skills and editor config ([194a731](https://www.github.com/jeffu231/AmateurRadioServices/commit/194a731b48eceb3b35ec7cac52ee1e379b5a87a6))
+* **skills:** declare format of log event messages ([64dfda4](https://www.github.com/jeffu231/AmateurRadioServices/commit/64dfda44221e4e100ac2d84b55c780fe5922acc4))
+
 <a name="1.2.0"></a>
 ## [1.2.0](https://www.github.com/jeffu231/AmateurRadioServices/releases/tag/v1.2.0) (2026-06-15)
 
