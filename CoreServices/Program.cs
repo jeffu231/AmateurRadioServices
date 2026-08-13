@@ -7,6 +7,7 @@ using CoreServices.Application;
 using CoreServices.Integrations.Aprs;
 using CoreServices.Integrations.Qrz;
 using CoreServices.Services;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Extensions.Options;
 
@@ -41,7 +42,10 @@ public static class Program
         ConfigureProviderClients(builder);
         builder.Services.AddScoped<ContactEnhancer>();
         
-        builder.Services.AddProblemDetails();
+        builder.Services.AddProblemDetails(options => options.CustomizeProblemDetails = context =>
+            context.ProblemDetails.Extensions["traceId"] = context.HttpContext.TraceIdentifier);
+        builder.Services.AddHealthChecks()
+            .AddCheck<ReadinessHealthCheck>("configuration", tags: ["ready"]);
         var rateLimitingOptions = builder.Configuration.GetSection("RateLimiting").Get<RateLimitingOptions>()
             ?? new RateLimitingOptions();
         if (rateLimitingOptions.Enabled)
@@ -52,8 +56,8 @@ public static class Program
         var app = builder.Build();
         
         app.UseMiddleware<FailedRequestLoggingMiddleware>();
-        EnableSwagger(app);
         app.UseExceptionHandler();
+        EnableSwagger(app);
 
         if (rateLimitingOptions.Enabled)
         {
@@ -61,6 +65,15 @@ public static class Program
         }
 
         app.UseAuthorization();
+
+        app.MapHealthChecks("/health/live", new HealthCheckOptions
+        {
+            Predicate = _ => false
+        });
+        app.MapHealthChecks("/health/ready", new HealthCheckOptions
+        {
+            Predicate = check => check.Tags.Contains("ready")
+        });
 
         var controllers = app.MapControllers();
         if (rateLimitingOptions.Enabled)

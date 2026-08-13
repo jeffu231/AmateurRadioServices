@@ -18,7 +18,7 @@ The delivery strategy is additive. Keep v1 routes running and do not silently su
 - [x] (2026-08-13 00:00Z) Correct v1 defects that are safe and necessary to fix without changing the response schema; publish their release notes.
 - [x] (2026-08-13 00:00Z) Add internal application/provider boundaries, cancellation, session coordination, and upstream resilience behind the v1 routes.
 - [x] (2026-08-13 00:00Z) Release the v2 contracts and endpoints in parallel with v1, including migration documentation and deprecation signals.
-- [ ] Harden deployment and observe production migration before proposing a v1 retirement date.
+- [x] (2026-08-13 00:00Z) Add provider-free liveness/readiness endpoints and container health wiring; production telemetry and the v1 retirement decision remain operational follow-up work.
 
 ## Surprises & Discoveries
 
@@ -282,3 +282,5 @@ Plan updated 2026-08-13 by Codex to record the completed fourth milestone. The v
 Plan updated 2026-08-13 by Codex to record the completed fifth milestone. V2 now exposes purpose-built contracts beside v1 using URL-segment version selection only, maps sanitized provider failures to documented Problem Details, and excludes QRZ session and vendor payload fields. Callsign identifiers use query parameters, rather than route segments, because portable and repeater callsigns such as `N9NOC/P` and `N9NOC/R` contain slashes; the migration guide requires `%2F` encoding and an integration test verifies it. V1 is not yet marked deprecated globally because production readiness and the required support-window notice have not been established.
 
 Plan updated 2026-08-13 by Codex to make every failed API request replayable for server-side diagnosis. Failure logging now records the request method, path, query string, content type, body, and final 4xx/5xx status in one middleware placed before exception handling and rate limiting; this includes invalid input, throttling, provider failures, and unhandled application errors.
+
+Plan updated 2026-08-13 by Codex to record the completed sixth milestone implementation. `/health/live` proves only that the process is answering HTTP, while `/health/ready` validates the already-loaded APRS and QRZ options without calling either provider. Docker uses liveness for its container health state and runs as the built-in non-root application user; Traefik uses readiness to remove an unready backend from load balancing. Production telemetry, trusted-proxy configuration, and the evidence-based v1 retirement decision require deployment-specific operational configuration and remain outside this repository change.
